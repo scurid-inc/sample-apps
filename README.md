@@ -14,6 +14,7 @@ Also see our [documentation](https://docs.scurid.com) for more details.
 ### Golang
 
 Building any golang apps requires [Go](https://golang.org/doc/install) to be installed on your machine.
+Also, the Scurid Edge agent should be onboarded running on your device, if not please follow the steps [here](https://docs.scurid.com/v23.0.2.1/autonomousDeviceOnboarding/)
 
 #### PiZero
 Provides a simple app that runs on Raspberry Pi Zero, it is possible to run it on other platforms as well. 
@@ -28,10 +29,9 @@ To launch the app follow the steps below:
 ```
 GOOS=linux GOARCH=arm GOARM=6 go build -o pizero-app
 ```
-3. Transfer the app to your device e.g. using [WinSCP](https://winscp.net/eng/download.php) or [FileZilla](https://filezilla-project.org/)
-4. Ensure you have onboarded the Scurid Edge Agent on your device, if not follow the steps [here](https://www.scurid.com/get-started)
-5. Launch the app:
+2. Transfer the app to your device e.g. using [WinSCP](https://winscp.net/eng/download.php) or [FileZilla](https://filezilla-project.org/)
+3. Launch the app:
 ```
 ./pizero-app -url localhost:4040 -agentconfig /store/config.yaml
 ```
-NOTE: The url for the edgeagent and path for the agentConfig flag above is the default path where Scurid Edge Agent stores its configuration file on your device. If you have edge agent running on a different path, please update accordingly.
+**NOTE**: The url for the edgeagent and path for the agentConfig flag above is the default path where Scurid Edge Agent stores its configuration file on your device. If you have edge agent running on a different path, please update accordingly.
