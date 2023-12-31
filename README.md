@@ -11,6 +11,9 @@ Also see our [documentation](https://docs.scurid.com) for more details.
 
 ## Sample Apps
 
+These sample apps are provided to help you quickly get started and test out different functionalities of Scurid for IoT Edge and beyond. 
+**Important**: These apps are provided as-is and are not meant to be used in production.
+
 ### Golang
 
 Building any golang apps requires [Go](https://golang.org/doc/install) to be installed on your machine.

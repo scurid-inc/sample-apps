@@ -15,7 +15,7 @@ func main() {
 	var agentURL = flag.String("url", "", "usage: -url localhost:4040 this is the URL of the Scurid Edge Agent.")
 
 	flag.Parse()
-	// dail the connection to the Scurid Edge Agent running on the device
+	// dial the connection to the Scurid Edge Agent running on the device
 	conn, err := grpc.Dial(*agentURL, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Error().Msgf("did not connect: %v", err)

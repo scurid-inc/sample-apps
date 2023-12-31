@@ -16,7 +16,7 @@ func issListener(agentid string, agentClient edgeApi.ScuridEdgeAgentAPIClient) {
 			log.Error().Msgf("Error fetching ISS data: %v", err)
 			break
 		}
-		// calls the agent client to send the data to the Scurid Edge Agent
+		// calls the Scurid edge agent client to send the data to the Scurid Server
 		res, err := agentClient.SendDeviceDataWithCustomFields(context.Background(), &edgeApi.SendDeviceDataWithCustomFieldsReq{
 			AgentDID: agentid,
 			Data:     []string{issRes},
