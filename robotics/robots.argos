@@ -30,7 +30,7 @@
         <range_and_bearing implementation="medium" medium="rab" />
         <colored_blob_omnidirectional_camera implementation="rot_z_only" medium="leds" show_rays="true" />
       </sensors>
-      <params script="aggregation.lua" />
+      <params script="robots.lua" />
     </lua_controller>
   </controllers>
 
