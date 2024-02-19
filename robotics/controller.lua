@@ -71,8 +71,7 @@ function robotBehaviour()
     -- the robot sense color of the ground
     val = tostring(robot.motor_ground[1].value)
     -- stream data
-    
-io.stdout:write('{"message":"success","timestamp":',os.time(os.date("!*t")),',"sensor":',val,',"x-coordinate":',robot.positioning.position.x,',"y-coordinate":',robot.positioning.position.y,',"robot-id":"',robot.id,'"}\n')
+    io.stdout:write('{"message":"success","timestamp":',os.time(os.date("!*t")),',"sensor":',val,',"x-coordinate":',robot.positioning.position.x,',"y-coordinate":',robot.positioning.position.y,',"robot-id":"',robot.id,'"}\n')
     N = senseRobotinProximity()
     t = robot.random.uniform()
     -- the robot is moving
