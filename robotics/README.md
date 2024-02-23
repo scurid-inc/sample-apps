@@ -1,9 +1,7 @@
-# Simulating Robotics with Scurid
+# Simulating Robots with Scurid
 The codebase contains code associated with ARGoS 3 simulator to simulate robotics scenario. It is one of the numerous example of applications of Scurid under sample-apps repository. 
 
 ## Pre-Requisites
-If using any of the sample apps ensure that you have a running Scurid setup. If not please follow the steps [here](https://www.scurid.com/get-started) to get started.
-Also see our [documentation](https://docs.scurid.com) for more details.
 
 ### Golang
 
