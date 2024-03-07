@@ -32,3 +32,9 @@ cd argos3 mkdir build_simulator cd build_simulator cmake ../src make
 argos3 -c robotics/robots.argos
 
 ```
+## Build and Run
+```
+cd swarm-robotics-sensor-data-collection
+go build
+./swarm-robotics-sensor-data-collection -url localhost:4041 -agentconfig store/config.yaml
+```
