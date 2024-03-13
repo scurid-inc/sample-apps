@@ -34,8 +34,9 @@ argos3 -c robotics/robots.argos
 ```
 
 #### Run the Agent
-
-./scuridedgeagent -store /Users/rk/Downloads/Scurid/agent-dir-robo-1/store -spaaddr localhost:443 -port :4040
+```./scuridedgeagent -store /Users/rk/Downloads/Scurid/agent-dir-robo-1/store -spaaddr localhost:443 -port :4040
+```
 
 #### Build and Run the data processing code 
-./swarm-robotics-sensor-data-collection -url localhost:4040 -agentconfig /Users/rk/Downloads/Scurid/agent-dir-robo-1/store/config.yaml
+```./swarm-robotics-sensor-data-collection -url localhost:4040 -agentconfig /Users/rk/Downloads/Scurid/agent-dir-robo-1/store/config.yaml
+```
