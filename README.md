@@ -38,3 +38,23 @@ GOOS=linux GOARCH=arm GOARM=6 go build -o pizero-app
 ./pizero-app -url localhost:4040 -agentconfig /store/config.yaml
 ```
 **NOTE**: The url for the edgeagent and path for the agentConfig flag above is the default path where Scurid Edge Agent stores its configuration file on your device. If you have edge agent running on a different path, please update accordingly.
+
+### Python
+
+Building the python apps requires [Python](https://www.python.org/downloads/) to be installed on your machine.
+Also, the Scurid Edge agent should be onboarded running on your device, if not please follow the steps [here](https://docs.scurid.com/v23.0.2.1/autonomousDeviceOnboarding/)
+
+To launch the app, follow the steps below:
+
+1. Navigate to the python directory and activate the venv. 
+
+On Windows, run:
+venv\Scripts\activate
+
+On Unix or MacOS, run:
+source venv/bin/activate
+
+2. Launch the app:
+```
+python3 main.py
+```
