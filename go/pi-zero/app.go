@@ -26,8 +26,7 @@ retry1:
 		time.Sleep(5 * time.Second)
 		goto retry1
 	}
-	// if there is approval key then it is likely valid and approved
-	// if there is tries to read on COM port
+	// if there is an approval key then it is likely valid and approved, if not issListener will print out the error message
 	issListener(agentConf.AgentDID, client)
 
 }
