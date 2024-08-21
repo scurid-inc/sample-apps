@@ -21,7 +21,8 @@ Upon execution of the above command a selection menu appears on the terminal
 ```
 1. Generate Identity
 2. Download Package
- 
+3. Exit
+
 Select your operation 
 ```
 First we need to generate an [identity](https://docs.scurid.com/v23.0.2.1/identityContextEnabledFileTransfer/). Select option 1 
@@ -51,7 +52,8 @@ Switch back to the terminal
 ```
 1. Generate Identity
 2. Download Package
- 
+3. Exit
+
 Select your operation 2
 ```
 Select operation 2
