@@ -1,4 +1,4 @@
-# Python Sample App
+# Python App: Identity Enabled Download
 This folder contains a sample app for the following features to be done on edge devices that run with an OS.
 
 1. Enables Edge Device to download an artifact based on identity associated with the agent. 
