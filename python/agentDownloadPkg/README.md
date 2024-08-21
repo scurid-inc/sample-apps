@@ -38,7 +38,7 @@ The identity is successfully generated.
 
 ```
 Identity DID :  did:scurid:0x8F55005e688cA37165e36D734b1a0374f156b39f
-Identity Name :  isro
+Identity Name :  my_device_identity
  
 Switch to the App and approve identity
 ```
@@ -54,6 +54,7 @@ Select your operation 2
 Select operation 2
 
 Enter the DID of my_device_identity
+
 Enter the full storage path where the artifact will be downloaded.
 
 ```
