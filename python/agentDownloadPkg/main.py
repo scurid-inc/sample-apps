@@ -3,8 +3,10 @@
 import edgeagent_pb2
 import edgeagent_pb2_grpc
 import grpc
+import calendar
+import time
 
-addr = 'localhost:4040'  # update the server and port accordingly
+addr = 'localhost:4040'  # update the server and port accordingly, addr corresponds to an agent
 channel = grpc.insecure_channel(addr)  # starting a local only channel
 stub = edgeagent_pb2_grpc.ScuridEdgeAgentAPIStub(channel)  # grpc client
 
@@ -19,7 +21,7 @@ def createidentitydemo():
 
 def registerIdentity(identity_name):
     param1 = createidentitydemo()
-    param2 = 902345112
+    param2 = calendar.timegm(time.gmtime())
     param3 = identity_name
     try:
         ireq = edgeagent_pb2.RegisterDeviceIdentityReq(did=param1,unixTime=param2,deviceName=param3)
@@ -34,6 +36,7 @@ def registerIdentity(identity_name):
         print(" ")
         print("Identity DID : ", param1)
         print("Identity Name : ",param3)
+        print("Timestamp : ", param2)
         print(" ")
         print("Switch to the App and approve identity")
 
