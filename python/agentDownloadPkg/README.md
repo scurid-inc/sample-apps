@@ -8,9 +8,9 @@ This folder contains a sample app for the following features to be done on edge 
 pip3 install -r requirements.txt
 ```
 ## Prerequisite
-1. The Scurid Server shall be up and running. 
-2. The Scurid App is connected to the Scurid Server.
-3. The Scurid Edge Agent is up and Approved by the Scurid App.
+1. The Scurid Server shall be up and running. See [here](https://docs.scurid.com/v23.0.2.1/quickstart/quickstart-on-premise/#download-scurid-server) for details.
+2. The Scurid App is connected to the Scurid Server. See [here](https://docs.scurid.com/v23.0.2.1/quickstart/quickstart-on-premise/#download-scurid-edge-agent) for details.
+3. The Scurid Edge Agent is up and Approved by the Scurid App. See [here](https://docs.scurid.com/v23.0.2.1/quickstart/quickstart-on-premise/#step-2-launching-scurid-server-and-app) for details.
 
 ## Steps to execute the example
 ```
