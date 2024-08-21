@@ -8,16 +8,65 @@ addr = 'localhost:4040'  # update the server and port accordingly
 channel = grpc.insecure_channel(addr)  # starting a local only channel
 stub = edgeagent_pb2_grpc.ScuridEdgeAgentAPIStub(channel)  # grpc client
 
-def downloadpkg():
+def createidentitydemo():
     try:
-        param1 = 'did:scurid:0x7b781C2fba42fE0CD5Ef979Fa579Cd6A4c0Ffbc3' #approved identity
-        param2 = '/Users/roshan/Downloads/sample-apps/python/agentDownloadPkg/downloads' #full path where the file needs to be stored
+        ireq = edgeagent_pb2.CreateDeviceIdentityReq()
+        req = stub.CreateDeviceIdentity(ireq)
+    except grpc.RpcError as e:
+        print(f'failed setting: {e.details}')
+    else:
+        return req.did
+
+def registerIdentity(identity_name):
+    param1 = createidentitydemo()
+    param2 = 902345112
+    param3 = identity_name
+    try:
+        ireq = edgeagent_pb2.RegisterDeviceIdentityReq(did=param1,unixTime=param2,deviceName=param3)
+
+        
+        req = stub.RegisterDeviceIdentity(ireq)
+    except grpc.RpcError as e:
+        print(f'failed setting: {e.details}')
+    else:
+        print(" ")
+        print("Identity generated successfully")
+        print(" ")
+        print("Identity DID : ", param1)
+        print("Identity Name : ",param3)
+        print(" ")
+        print("Switch to the App and approve identity")
+
+
+def downloadpkg(identity,storagePath):
+    try:
+        param1 = identity #approved identity
+        param2 = storagePath #full path where the file needs to be stored
         ireq = edgeagent_pb2.DownloadFilesReq(identity=param1,path=param2)
         req = stub.DownloadFiles(ireq)
     except grpc.RpcError as e:
         print(f'failed setting: {e.details}')
     else:
-        print(req)
+        print(" ")
+        print("Package downloaded at location: ",param2)
 
 if __name__ == '__main__':
-    downloadpkg()
+    while(1):
+        print(" ")
+        print("1. Generate Identity")
+        print("2. Download Package")
+        print("3. Exit")
+        print(" ")
+        choice = input('Select your operation ')
+        print(" ")
+        
+        if choice == "1":
+            name = input("Identity Name ")
+            registerIdentity(name)
+        if choice == "2":
+            identity = input("Identity DID : ")
+            storagePath = input("Storage Path : ")
+            downloadpkg(identity,storagePath)
+        if choice == "3":
+            exit()
+
