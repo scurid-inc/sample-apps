@@ -24,7 +24,7 @@ Upon execution of the above command a selection menu appears on the terminal
  
 Select your operation 
 ```
-First we need to generate an identity. Select option 1 
+First we need to generate an [identity](https://docs.scurid.com/v23.0.2.1/identityContextEnabledFileTransfer/). Select option 1 
 
 ```
 Select your operation 1
@@ -42,7 +42,7 @@ Identity Name :  my_device_identity
  
 Switch to the App and approve identity
 ```
-Now move to the Scurid App and switch to the Identities section of the App. The newly generated identity can be found under Pending tab. Approve the identity and upload the artifact through the App.
+Now move to the Scurid App and switch to the Identities section of the App. The newly generated identity can be found under Pending tab. Approve the identity and upload the artifact through the App. See [here](https://docs.scurid.com/v23.0.2.1/identityContextEnabledFileTransfer/) for detailed steps.
 
 Switch back to the terminal 
 ```
