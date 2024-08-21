@@ -64,9 +64,10 @@ Enter the full storage path where the artifact will be downloaded.
 
 ```
 Identity DID : did:scurid:0x8F55005e688cA37165e36D734b1a0374f156b39f
-Storage Path : /Users/roshan/Downloads/sample-apps/python/agentDownloadPkg/downloads
+
+Storage Path : /Downloads/sample-apps/python/agentDownloadPkg/downloads
  
-Package downloaded at location:  /Users/roshan/Downloads/sample-apps/python/agentDownloadPkg/downloads
+Package downloaded at location:  /Downloads/sample-apps/python/agentDownloadPkg/downloads
 ```
 
 Artifact is downloaded.
