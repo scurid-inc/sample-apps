@@ -2,8 +2,8 @@ package main
 
 import (
 	edgeApi "bitbucket.org/scurid/edgeagentapis/pkg/grpc/edgeagent/v1"
-	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
+	"log"
 	"os"
 	sampleApps "scurid-inc/sample-apps"
 	"time"
@@ -17,12 +17,11 @@ func issDataEgress(client edgeApi.ScuridEdgeAgentAPIClient, filename string) {
 
 	regRequest.RequestedOn = time.Now().Unix()
 retry1:
-
-	log.Info().Msgf("reading agent config file %s", filename)
+	log.Println("reading agent config file ", filename)
 	agentConf := readAgentConfig(filename)
 	// checks if there is agent identity
 	if agentConf.ApprovalKey == "" {
-		log.Info().Msg("Agent is not registered, will retry in 5 seconds ...")
+		log.Println("Agent is not registered, will retry in 5 seconds ...")
 		time.Sleep(5 * time.Second)
 		goto retry1
 	}
@@ -41,7 +40,8 @@ func readAgentConfig(filename string) *sampleApps.AgentInfo {
 		return &config
 	}
 	if err := yaml.Unmarshal(b, &config); err != nil {
-		log.Error().Msg(err.Error())
+
+		log.Println("Error reading config file")
 		return &config
 	}
 	return &config
