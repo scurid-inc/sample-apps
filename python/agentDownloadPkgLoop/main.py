@@ -6,6 +6,8 @@ import grpc
 import calendar
 import time
 import os
+import string
+import random
 
 
 addr = 'localhost:4040'  # update the server and port accordingly, addr corresponds to an agent
@@ -40,7 +42,8 @@ def registerIdentity(identity_name):
         print("Identity Name : ",param3)
         print("Timestamp : ", param2)
         print(" ")
-        print("Switch to the App and approve identity")
+        print("Switch to the App, approve identity, and set artifacts")
+    return param1
 
 
 def downloadpkg(identity,storagePath):
@@ -51,12 +54,15 @@ def downloadpkg(identity,storagePath):
         if not os.path.exists(param2):
             os.makedirs(param2)
 
-        print("==== downloading ====")
         while(1):
             counter = counter + 1
-            print("Download attempt - ",counter)
             ireq = edgeagent_pb2.DownloadFilesReq(identity=param1,path=param2)
-            req = stub.DownloadFiles(ireq)
+            try:
+                req = stub.DownloadFiles(ireq)
+                print("==== downloading ====")
+                print("Download attempt - ",counter)
+            except Exception as e:
+                print("error: ",e.details)
             time.sleep(3)
     except grpc.RpcError as e:
         print(f'failed setting: {e.details}')
@@ -65,21 +71,9 @@ def downloadpkg(identity,storagePath):
         print("Package downloaded at location: ",param2)
 
 if __name__ == '__main__':
-    while(1):
-        print(" ")
-        print("1. Generate Identity")
-        print("2. Download Package")
-        print("3. Exit")
-        print(" ")
-        choice = input('Select your operation ')
-        print(" ")
-        
-        if choice == "1":
-            name = input("Identity Name ")
-            registerIdentity(name)
-        if choice == "2":
-            identity = input("Identity DID : ")
-            storagePath = input("Storage Path : ")
-            downloadpkg(identity,storagePath)
-        if choice == "3":
-            exit()
+        N = 7
+        identityname = ''.join(random.choices(string.ascii_uppercase +
+                             string.digits, k=N))
+        identity = registerIdentity(identityname)
+        storagePath = "downloads/"+identity
+        downloadpkg(identity,storagePath)
