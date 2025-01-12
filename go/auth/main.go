@@ -19,8 +19,8 @@ import (
 
 const (
 	serverAddress = "localhost:443" // replace with your Scurid Server address and port
-	//username      = "yourEmailInScuridApp@domain.com" // replace with your email address that has been created and approved in the Scurid App
-	//password      = "your password"                   // replace with your password
+	username      = "yourEmailInScuridApp@domain.com" // replace with your email address that has been created and approved in the Scurid App
+	password      = "your password"                   // replace with your password
 )
 
 /*
