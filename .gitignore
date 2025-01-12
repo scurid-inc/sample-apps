@@ -2,3 +2,17 @@
 *.exe
 /go/pi-zero/pi-zero
 /python/venv
+.venv
+
+/go/pi-zero/sampleapp-darwin
+/go/pi-zero/sampleapp-linux
+.venv/
+device_did.txt
+
+# Python generated files and directories
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+go/auth/ca-cert.pem
