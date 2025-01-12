@@ -1,4 +1,4 @@
-#README
+# README
 
 A sample golang app to authenticate the device with the Scurid Server. This is designed to be run as embedded in your backend applications.
 
