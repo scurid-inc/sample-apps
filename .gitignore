@@ -2,3 +2,7 @@
 *.exe
 /go/pi-zero/pi-zero
 /python/venv
+.venv/
+/python/edgeAuth/device_did.txt
+/go/pi-zero/sampleapp-darwin
+/go/pi-zero/sampleapp-linux
