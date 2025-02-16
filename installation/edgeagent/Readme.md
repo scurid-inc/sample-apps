@@ -5,7 +5,7 @@ This script automates the installation and setup of the **Scurid Edge Agent**, e
 ---
 
 ## Features
-- **Downloads the latest binary** from a specified URL (default: Google Cloud Storage).
+- **Downloads the latest binary** from a specified URL 
 - **Configures the agent** using provided command-line parameters or environment variables.
 - **Ensures correct permissions** for the `scurid` user.
 - **Sets up a systemd service** for automatic startup and management.
@@ -31,7 +31,7 @@ sudo bash install.sh [options]
 | `--name` | Name of the agent instance. Overrides environment values. | `scurid-edge-agent-1` or value from `.env` (`EDGE_ID`)                                            |
 
 
-## Download URL for the Edge Agent v24.1.0.0
+## Download for different linux flavours and architecture Edge Agent v24.1.0.0
 
 | Platform      | URL |
 |---------------|-----|
