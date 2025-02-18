@@ -15,9 +15,20 @@ This script automates the installation and setup of the **Scurid Edge Agent**, e
 ## Usage
 
 ### Run the script
-```bash
-sudo bash install.sh [options]
+
+```shell
+install.sh
 ```
+
+## Specify a custom download URL
+```shell
+install.sh --url "https://example.com/custom-agent"
+```
+
+## Configuration
+1. If an .env file is found in $HOME, /home/atmark/, or /home/user1/, the script will use EDGE_ID as the agent name.
+2. If --name is provided via CLI, it overrides the .env value.
+
 
 | Parameter | Description | Default Value                                                                                     |
 |-----------|-------------|---------------------------------------------------------------------------------------------------|
@@ -58,28 +69,11 @@ sudo bash install.sh [options]
 
 
 
-
-
-## How to install Commands
-
-```shell
-install.sh
-```
-
-## Specify a custom download URL
-```shell
-install.sh --url "https://example.com/custom-agent"
-```
-
-## Configuration
-1. If an .env file is found in $HOME, /home/atmark/, or /home/user1/, the script will use EDGE_ID as the agent name.
-2. If --name is provided via CLI, it overrides the .env value.
-
 ## Systemd Service
 
 The script automatically creates a systemd service:
-•	Service Name: scuridedgeagent
-•	Service File: /etc/systemd/system/scuridedgeagent.service
+* Service Name: scuridedgeagent 
+* Service File: /etc/systemd/system/scuridedgeagent.service
 
 ```shell
 sudo systemctl status scuridedgeagent
