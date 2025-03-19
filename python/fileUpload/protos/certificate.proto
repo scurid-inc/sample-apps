@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package certificate.v1;
+
+option go_package = "bitbucket.org/scurid/scurid-apis/pkg/grpc/certificate/v1";
+
+message CSR {
+  bytes data = 1; // certificate signing request from the grpc server
+  int32 lifetime = 2; // lifetime of certificate
+}
+// CSRCustom provides custom fields for the certificate signing request
+// currently to be used for agent configuration
+// more fields can be added as needed in the future to expand the functionality
+message CSRCustom {
+  string commonName = 1; // common name of the certificate
+  string country = 2; // country of the certificate
+  string province = 3 ; // province of the certificate
+  string locality = 4 ; // locality of the certificate
+  string organization = 5 ; // organization of the certificate
+  string organizationalUnit = 6; // organizational unit of the certificate
+  string emailAddress = 7; // email address of the certificate
+  int32  lifetimeDays = 8; // lifetime of certificate
+}

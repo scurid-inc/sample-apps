@@ -1,0 +1,326 @@
+syntax = "proto3";
+import "deviceContext.proto";
+import "deviceData.proto";
+import "integration.proto";
+import "certificate.proto";
+import "metadata/metadata.proto";
+import "user.proto";
+package platformInternal;
+option go_package = "bitbucket.org/scurid/scurid-apis/pkg/grpc/platformInternal/v1";
+
+// This API is to be used by :
+// * Scurid Edge Agent
+// * Desktop app
+// * Custom application
+// * Intent is to use this of all the communication that is needed between the Agent and the backend but is not required to be exposed to
+// the users
+
+// AgentManagement contains endpoint that are needed to manage internal communication between the Agents and the Platform
+// This will be used to perform internal tasks, that can be offload from users to simplify agent to platform workings
+service AgentManagement {
+  // Requests the registration of an agent
+  rpc RequestAgentRegistration (RequestAgentRegistrationReq) returns (RequestAgentRegistrationRes) {
+    option (metadata.v0.operationType) = WRITE;
+    option (metadata.v0.operationType) = UPDATE;
+  };
+  // StatusCheck provides update if the identity for the agent is approved
+  // if approved agent will receive a key
+  rpc StatusCheck (StatusCheckReq) returns (StatusCheckRes) {
+    option (metadata.v0.operationType) = READ;
+  };
+
+  rpc GetAgentConfig (GetAgentConfigReq) returns (GetAgentConfigRes){
+    option (metadata.v0.operationType) = READ;
+  };
+}
+
+
+// DeviceDataManagement set of endpoints to help manage data flow from devices back to Scurid Backend
+service DeviceDataManagement {
+  // Send opens bidi stream, between device and the server
+  // currently server is only configured to return boolean confirmation. todo extend for more later.
+  rpc Send(stream SendReq) returns (stream SendRes){
+    option (metadata.v0.operationType) = WRITE;
+    option (metadata.v0.operationType) = UPDATE;
+  };
+  // SendWithUserDefinedFields creates client streaming to send array of data set from the Scurid Edge Agent to the Scurid Server
+  rpc SendWithUserDefinedFields (stream SendWithUserDefinedFieldsReq) returns (SendWithUserDefinedFieldsRes) {
+    option (metadata.v0.operationType) = WRITE;
+    option (metadata.v0.operationType) = UPDATE;
+  };
+}
+
+// Allows setting up global database store for the Scurid Backend which enables Scurid Edge agents to store device data
+service DataStorage {
+  // GetCloudProviders fetches list of currently supported cloud providers
+  // this API is to deliver default configuration offered by Scurid
+  rpc GetCloudProviders(GetCloudProvidersReq) returns (GetCloudProvidersRes){
+    option (metadata.v0.operationType) = READ;
+  };
+
+  // GetDBRegionList provides list of global region list where distributed data storage can be setup
+  // this API is to deliver default configuration offered by Scurid
+  rpc GetDBRegionList(GetDBRegionListReq) returns (stream GetDBRegionListRes){
+    option (metadata.v0.operationType) = READ;
+  };
+
+  // StoreRegionConfig stores region information as selected by the user
+  // this helps build region configuration for the end users
+  rpc StoreRegionConfig(StoreRegionConfigReq) returns (StoreRegionConfigRes){
+    option (metadata.v0.operationType) = WRITE;
+    option (metadata.v0.operationType) = UPDATE;
+  };
+
+  // GetUserRegionConfig fetches list of regions configured for the user
+  // this API must be used after the initial on-boarding is finished using StoreRegionConfig
+  // this helps build region configuration for the end user scope
+  rpc GetUserRegionConfig(GetUserRegionConfigReq) returns (GetUserRegionConfigRes){
+    option (metadata.v0.operationType) = READ;
+  };
+
+  // StoreAgentRegionConfig stores agent's region configuration
+  // this API must be used after the initial user region setup is complete via StoreRegionConfig
+  rpc StoreAgentRegionConfig (StoreAgentRegionConfigReq) returns (StoreAgentRegionConfigRes) {
+    option (metadata.v0.operationType) = WRITE;
+    option (metadata.v0.operationType) = UPDATE;
+  };
+
+  // GetAgentRegionConfig fetches list of region configuration for the agent
+  // this API must be used after the initial agent setup is complete via StoreAgentRegionConfig
+  rpc GetAgentRegionConfig (GetAgentRegionConfigReq) returns (GetAgentRegionConfigRes) {
+    option (metadata.v0.operationType) = READ;
+  };
+
+  // CreateCredentials create required username , password, connection string and the database name for the user
+  rpc CreateCredentials (CreateCredentialsReq) returns (CreateCredentialsRes) {
+    option (metadata.v0.operationType) = WRITE;
+  };
+
+  // Fetches the credentials for a given customer
+  rpc GetCredentials (GetCredentialsReq) returns (GetCredentialsRes) {
+    option (metadata.v0.operationType) = READ;
+  };
+
+  // GetAgentData provides dataset for the device
+  rpc GetAgentData(deviceData.GetAgentDataReq) returns (stream deviceData.GetAgentDataRes){
+    option (metadata.v0.operationType) = READ;
+  }
+
+  // GetAgentDataStat returns the number of data that can be successfully verified and dataPoints that couldn't be verified
+  rpc GetAgentDataStat(deviceData.GetAgentDataStatReq) returns (deviceData.GetAgentDataStatRes){
+    option (metadata.v0.operationType) = READ;
+  }
+}
+
+message DeviceFileDownloadConfig {
+  bool autoCreateDir = 1; // if true, the server will instruct the agent to create a directory if it does not exist.
+  bool enableStage = 2; // if true, the server will persist the file stage, if false server will delete the files and folders after the successful transfer to the agent.
+}
+
+message GetAgentConfigReq {
+  string AgentID = 1;
+  repeated ArtifactHash artifactHashOnAgent = 2; // artifacts hash on the agent
+}
+
+message GetAgentConfigRes {
+  integration.IntegrationDetails integrationDetails = 1;
+  string agentName = 2;
+  repeated user.v1.DeviceUsers deviceUsers = 3; // these are the list of deviceUsers assigned to the agent
+  optional AgentMetadata agentMetadata = 4;
+  DeviceFileDownloadConfig deviceFileDownloadConfig = 5;
+}
+
+message AgentMetadata {
+  repeated ArtifactHash cumulativeArtifactsHash = 1; // this is the list of files and their individual hashes.
+  string downloadPathOnAgent = 2; // this is the path on the agent where the artifacts are downloaded. Since each agent maps to a device, this is essentially path on the device.
+  string UserUploadPath = 3; //
+}
+
+message ArtifactHash {
+  string fileName = 1;
+  string fileHash = 2;
+}
+
+message DatabaseCredential {
+  string username = 1;
+  string password = 2;
+  string databaseName = 3;
+
+}
+message CreateCredentialsReq {
+  DatabaseCredential credential = 1;
+  int64 dataStoreRegionId = 2;  // this is the internal id assigned by Scurid; it must be available to create an identity. Call GetUserRegionConfig to get the id if not available.
+
+}
+
+message CreateCredentialsRes {
+  bool res = 1;
+}
+
+message GetCredentialsReq {
+  string platformIdentity = 1;
+}
+
+message GetCredentialsRes {
+  repeated DatabaseCredential credentials = 1;
+}
+
+message GetUserRegionConfigReq {
+  string platformIdentity = 1; // this is the platform DID of the user
+}
+
+message GetUserRegionConfigRes {
+  repeated DataStoreRegion userCreatedRegions = 1;
+}
+
+message GetAgentRegionConfigReq {
+  string agentIdentity = 1; // this is the agent identity, i.e. the DID, caller can request information on one
+}
+
+message GetAgentRegionConfigRes {
+  repeated DataStoreRegionForAgent agentRegionInfo = 1;
+}
+
+// for agents under user / customer
+message DataStoreRegionForAgent {
+  DataStoreRegion data = 1; // this is the regional and cloud configuration defined by the users
+  string platformIdentity = 2; // this is the did of the platform
+  bool isAgentEnabled = 3; // this provides information if the agent has been enabled by the user for data storage.
+}
+
+
+message StoreAgentRegionConfigReq {
+  RegionConfigForAgent data = 1; // data to store the information for agent's config
+  bool enableStorage = 2; // this controls if the agent should use the config to write to the datastore
+}
+
+message RegionConfigForAgent {
+  string agentIdentity = 1; // this is the DID of the agent
+  int64 regionConfigId = 2; // this MUST be acquired by calling GetUserRegionConfig. The regions used for storing the information for the agent must already have been created in the system
+}
+
+message  StoreAgentRegionConfigRes {
+  bool status = 1; // default is false, when stores successfully true is returned
+}
+
+message StoreRegionConfigReq {
+  string identity = 1; // use the platformDID
+  int64 id = 2; // use the value defined from the DataStoreRegion.ID
+}
+
+message StoreRegionConfigRes {
+  bool status = 1; // default is false, if successful True is returned
+}
+
+message GetCloudProvidersReq{
+  // intentionally left empty
+}
+
+message GetCloudProvidersRes{
+  repeated CloudProviders providers = 1;
+}
+
+message CloudProviders {
+  string name = 1; // e.g. AWS, GCP, Azure etc.
+}
+
+message GetDBRegionListReq {
+  string cloudProviderName = 1; // this the name of the
+}
+
+message DataStoreRegion{
+  string regionName = 1; // e.g. west-eu-1, japan-east-1, names returned here must match the naming conventions from the cloud
+  int64 id = 2; // this is the internal id assigned by Scurid
+  string gps = 3; // this is the gps location of the datacenter provided by the cloud provider
+  bool enabled = 4; // default is false, if region's available true is returned
+  string regionGroup = 5; // e.g. EMEA, APAC, US, etc.
+  string cloudProviderName = 6; // e.g. AWS, GCP, Azure etc.
+}
+
+message GetDBRegionListRes {
+  DataStoreRegion regionInfo = 1 ;
+}
+
+message SendReq {
+  string agentDID = 1;
+  deviceData.MaWaRouteDataStruct mawaData = 2; // specific to MaWaRoute
+  deviceData.DeviceData deviceData = 3; // this is the generic structure for users deploying Scurid Edge Agent and using its data transfer capabilities. This is could JSON string for now. Need more work to create more customer specific structure
+  certificate.v1.CSR csr = 4;
+}
+
+message SendRes {
+  bool res = 1;
+}
+
+// StatusCheckReq used for checking the agent status
+message StatusCheckReq {
+  string agentDID = 1; // this is the DID of the agent
+}
+
+message StatusCheckRes {
+  string key = 1; // this is the key returned by the backend, that must be used by the identities to relate themselves to an agent
+  string status = 2; // to enable decision making on the edge agent
+  OtherPlatformIntegrationRes otherPlatformIntegrationRes = 3;
+  repeated user.v1.DeviceUsers deviceUsers = 19; // this is the list of human users who can access the agent, being introduced for the extended usecase where device users will login with biometric
+}
+
+// response message for RequestAgentRegistration
+message RequestAgentRegistrationReq {
+  string agentVerInfo = 1; // edge agent version used for creating DID
+  int64 requestedOn = 2; // Unix timestamp when identity was created
+  deviceContext.DeviceContext deviceContext = 3; // helps to onboard and bind a device to an identity
+  bytes signatureOnDeviceContext = 4; // hash calculated on the fields requestedOn + DeviceContext. THIS must be sent by the agent and will be recorded on the backend and used for future verification.
+  string agentDID = 5; // this is the DID of the agent
+  string agentName = 6; // this is the name of the agent
+}
+
+// RequestAgentRegistrationRes is the response from RequestAgentRegistration
+message RequestAgentRegistrationRes{
+  bool result = 1; // True if successfully completed the requested of registration else false.
+}
+
+message OtherPlatformIntegrationReq{
+  ThingWorx thingWorx = 1; // config. related to ThingWorx
+}
+
+message OtherPlatformIntegrationRes{
+  ThingWorx thingWorx = 1; //
+}
+
+message ThingWorx {
+  bool RequestOnboard = 1;
+  string AppKey = 2;
+}
+
+message SendWithUserDefinedFieldsReq {
+  optional string row = 1;        // Original JSON string or data row
+  string signature = 2;           // Signature for verification
+  int64 timestamp = 3;            // Timestamp of the data
+  string agentDID = 4;            // Agent Device ID
+  optional InfluxData influxData = 5; // Contains tags and fields
+}
+
+message SendWithUserDefinedFieldsRes {
+  bool success = 1;
+}
+
+service CustomSender {
+  rpc SendWithUserDefinedFields(stream SendWithUserDefinedFieldsReq) returns (SendWithUserDefinedFieldsRes){
+    option (metadata.v0.operationType) = WRITE;
+    option (metadata.v0.operationType) = UPDATE;
+  };
+}
+
+message InfluxData {
+  map<string, string> tags = 1;       // Tags as key-value pairs (string keys and values)
+  map<string, Value> fields = 2;      // Fields with various data types
+}
+
+message Value {
+  oneof value {
+    int64 int_value = 1;
+    double double_value = 2;
+    string string_value = 3;
+    bool bool_value = 4;
+  }
+}

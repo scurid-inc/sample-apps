@@ -1,0 +1,274 @@
+syntax = "proto3";
+
+package edgeagentapis.v1;
+
+option go_package = "bitbucket.org/scurid/edgeagentapis/pkg/grpc/edgeagent/v1";
+
+// provides set of services that will be exposed as APIs for -
+// Edge clients looking to interact with ScuridEdgeAgent
+
+service ScuridEdgeAgentAPI {
+
+  // Create an identity
+  rpc CreateDeviceIdentity (CreateDeviceIdentityReq) returns (CreateDeviceIdentityRes) {
+  };
+
+  // Delete an existing DID
+  rpc DeleteDeviceDID (DeleteDeviceIdentityReq) returns (DeleteDeviceIdentityRes) {
+  };
+
+  // Validates if particular identity was already created locally
+  rpc GetDeviceIdentity (GetDeviceIdentityReq) returns (GetDeviceIdentityRes) {
+  };
+
+  // Get currently installed version of edge agent
+  rpc GetScuridEdgeAgentVersion (Empty) returns (GetScuridEdgeAgentVersionRes){
+
+  };
+
+  // Signs a payload with identity
+  rpc SignWithIdentity (SignWithIdentityReq) returns (SignWithIdentityRes){
+
+  };
+
+  // Verifies a signature tagged to the payload
+  rpc VerifySignature (VerifySignatureReq) returns (VerifySignatureRes){
+
+  };
+  // Signs a byte array payload with identity
+  rpc SignBytePayloadWithIdentity (SignBytePayloadWithIdentityReq) returns (SignBytePayloadWithIdentityRes){};
+
+  // Verifies a byte array payload with identity
+  rpc VerifyBytePayloadWithIdentity (VerifyBytePayloadWithIdentityReq) returns (VerifyBytePayloadWithIdentityRes){};
+
+  // To be called for registering the device identity for the first time
+  // Expects additional device data that will be used for binding the identity with the device
+  rpc RegisterDeviceIdentity (RegisterDeviceIdentityReq) returns (RegisterDeviceIdentityRes){
+  };
+
+  // GetToken to receive required token from Scurid Platform App
+  // Needed in order to access APIs that need authentication from the Scurid Platform App
+  // Not used for authentication locally on the Scurid Edge Agent
+  // Also used for refreshing the token
+  rpc GetToken (GetTokenReq) returns (GetTokenRes){};
+
+  // Used for downloading one or more files
+  // number of files to download will depend on files prepared by the admin on Scurid Platform App
+  rpc DownloadFiles(DownloadFilesReq) returns (DownloadFilesRes) {};
+
+  // invokes send data services within the Agent to send to the Scurid backend Server
+  rpc SendDeviceData(SendDeviceDataReq) returns (SendDeviceDataRes){};
+
+  // SendDeviceDataWithCustomFields this is used to send data to the Scurid backend Server with JSON formatted with custom fields
+  rpc SendDeviceDataWithCustomFields (SendDeviceDataWithCustomFieldsReq) returns (SendDeviceDataWithCustomFieldsRes){};
+
+  // Initiates a human authentication with the device on which the Scurid Edge Agent is running
+  // before using this make sure user has enrolled biometric data with Scurid Server; if the user has never enrolled for bio-metric data, calling this API endpoint
+  // will not be enough. Post enrollment an administrator must grant required access rights and mapping of the user to the device
+  rpc BiometricAuth (BiometricAuthReq) returns (BiometricAuthRes){};
+
+  // GetDeviceUsers returns the list of users who have access to the device
+  // this is the list of users who have enrolled with biometrics and have received access rights from the administrator
+  rpc GetDeviceUsers (GetDeviceUsersReq) returns (GetDeviceUsersRes) {};
+
+
+  // CreateDeviceIdentityWithAdditionalCrypto is an extended version of CreateDeviceIdentity
+  // allows to create an identity with additional crypto artefacts
+  rpc CreateDeviceIdentityWithAdditionalCrypto (CreateDeviceIdentityWithAdditionalCryptoReq) returns (CreateDeviceIdentityWithAdditionalCryptoRes) {
+  };
+}
+
+message GetDeviceUsersReq {
+  // left blank
+}
+
+message GetDeviceUsersRes {
+  repeated DeviceUsers deviceUsers = 1;
+}
+
+
+message DeviceUsers {
+  string email = 1; // email address of the
+  string sessionID = 2; // recorded when the user enrolled
+}
+
+message Empty{
+  // left blank
+}
+
+message BiometricAuthReq {
+  string id = 1; // maps to the session id
+  string email = 2;
+  string agentDID = 3;
+}
+
+message BiometricAuthRes {
+  bool result = 1;
+}
+message SendDeviceDataWithCustomFieldsReq {
+  string agentDID = 1; // this is the agent's / device identity
+  repeated string data = 2; // array of JSON formatted data, use this for non InfluxDB data
+  optional InfluxData influxData = 3; // Contains tags and fields for InfluxDB
+}
+
+message SendDeviceDataWithCustomFieldsRes {
+  bool result = 1;
+}
+
+message GetOnboardingPackageReq{
+  string did = 1; // public DID
+}
+
+message GetOnboardingPackageRes {
+  string onboardingPkg = 1; // can contain any kind of on boarding information, JSON, XML etc.
+}
+
+
+message GetTokenReq {
+  string username = 1; // public DID
+}
+
+message GetTokenRes {
+  string token = 1; // short lived encrypted token returned by the server on successful login
+}
+
+message VerifySignatureReq {
+  string signature = 1;
+  string payload = 2;
+  string did = 3; //identity i.e. did:scurid:XXXXXXXXXXX ; note identity is case sensitive
+}
+message VerifySignatureRes {
+  bool isValid = 1; // true if valid, else false
+}
+message SignWithIdentityReq {
+  string payload = 1; // data to be signed
+  string did = 2; // identity i.e. did:scurid:XXXXXXXXXXX ; note identity is case sensitive
+}
+message SignWithIdentityRes {
+  string signature = 1; // generated signature
+}
+
+message SignBytePayloadWithIdentityReq{
+  bytes payload = 1; // array if bytes  to be signed
+  string did = 2; // identity i.e. did:scurid:XXXXXXXXXXX ; NOTE identity is case sensitive
+}
+
+message SignBytePayloadWithIdentityRes{
+  string signature = 1; // generated signature
+}
+
+message VerifyBytePayloadWithIdentityReq{
+  string signature = 1;
+  bytes payload = 2;
+  string did = 3; //identity i.e. did:scurid:XXXXXXXXXXX ; NOTE: identity is case sensitive
+}
+
+message VerifyBytePayloadWithIdentityRes{
+  bool isValid = 1; // true if valid, else false (Defaults to False)
+}
+
+message CreateDeviceIdentityReq {
+  // left blank intentionally
+}
+
+message CreateDeviceIdentityRes {
+  string did = 1;
+}
+
+message DeleteDeviceIdentityReq {
+  string did = 1;
+}
+
+message DeleteDeviceIdentityRes {
+  bool result = 1;
+}
+// DID to be checked if it exists
+message GetDeviceIdentityReq {
+  string did = 1;
+}
+// provides validation that device's DID is already generated
+message GetDeviceIdentityRes {
+  string did = 1;
+}
+// provides what agent version is currently installed on the hardware
+message GetScuridEdgeAgentVersionRes{
+  string agentVersion = 1;
+}
+// sent by any client using the edge agent for generating the identity
+// req expects fields of type GetDeviceIdentityReq and GetScuridEdgeAgentVersionRes
+message RegisterDeviceIdentityReq{
+  string did = 1; // public identity of DID
+  int64 unixTime = 2; // time of request
+  string deviceName = 3; // device name provided by the Iot Software interacting with the agent
+}
+// Response for registration request from the caller
+message RegisterDeviceIdentityRes{
+  bool result = 1; // simply a confirmation if request has been received or not
+}
+
+message ArtifactHash {
+  string fileName = 1;
+  string fileHash = 2;
+}
+
+// request structure to be sent
+message DownloadFilesReq {
+  string identity = 1; // device's public identity
+  string path = 2; // where ever user wants to store the files
+  bool autoCreateDir = 3; // automatically create storage dir
+  bool enableStaging = 4; // stage files for download
+  repeated ArtifactHash artifactHashOnAgent = 5; // list of files and their corresponding hashes on the agent
+}
+// true if all files are downloaded, else false - check error for details
+message DownloadFilesRes {
+  bool result = 1; // True/False, confirms if the files have been downloaded, check for error if false
+}
+// Note: ensure to acquire login token for the agent which is trying to send this data
+message SendDeviceDataReq {
+  string identity = 1; // device's public identity
+  string deviceData = 2; // this is the json string
+}
+
+message SendDeviceDataRes {
+  bool result = 1; // True/False, confirms if the data has been sent successfully, check for error if false
+}
+
+message InfluxData {
+  map<string, string> tags = 1;       // Tags as key-value pairs (string keys and values)
+  map<string, Value> fields = 2;      // Fields with various data types; values that will be signed by the identity
+}
+
+message Value {
+  oneof value {
+    int64 int_value = 1;
+    double double_value = 2;
+    string string_value = 3;
+    bool bool_value = 4;
+  }
+}
+
+message CreateDeviceIdentityWithAdditionalCryptoReq {
+  // left blank intentionally
+}
+
+message CreateDeviceIdentityWithAdditionalCryptoRes {
+  string did = 1;
+  ECDSAPubKey512 ECDSA512_pub_key = 2;
+  AES128Key AES128_key = 3;
+}
+
+// ECDSAPubKey512 is used to store the 512 bit ECDSA public key
+// Generate ECDSA-256 (P-512) Key Pair
+message ECDSAPubKey512 {
+  bytes pubX = 2;
+  bytes pubY = 3;
+}
+
+// AES128Key is used to store return the 128 bit AES key
+// returns both the key in bytes and string format
+message AES128Key {
+  bytes keyBits = 1;
+  string keyBitsString = 2;
+}
+
+

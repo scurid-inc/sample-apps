@@ -1,0 +1,86 @@
+syntax = "proto3";
+import "dataStorageType.proto";
+import "metadata/metadata.proto";
+package noRdbmsConfig.v0;
+option go_package = "bitbucket.org/scurid/scurid-apis/pkg/grpc/noRdbmsConfig/v0";
+
+
+service NoRdbmsConfigurationService {
+  rpc GetNoRdbmsConfiguration(GetNoRdbmsConfigReq) returns (GetNoRdbmsConfigRes){
+    option (metadata.v0.operationType) = READ;
+  };
+  rpc StoreNoRdbmsConfiguration(StoreNoRdbmsConfigReq) returns (StoreNoRdbmsConfigRes){
+    option (metadata.v0.operationType) = WRITE;
+    option (metadata.v0.operationType) = UPDATE;
+  };
+
+  // GetInfluxConfigs, if configName is left empty, all configs are returned, otherwise specific config is returned
+  rpc GetInfluxConfigs(GetInfluxConfigsReq) returns(GetInfluxConfigsRes) {
+    option (metadata.v0.operationType) = READ;
+  };
+
+  // DeleteInfluxConfig requires exact influxConfigName to be passed in the request
+  rpc DeleteInfluxConfig(DeleteInfluxConfigReq) returns(DeleteInfluxConfigRes) {
+    option (metadata.v0.operationType) = WRITE;
+    option (metadata.v0.operationType) = UPDATE;
+  }
+
+}
+
+
+message DeleteInfluxConfigReq {
+  string influxConfigName = 1;
+}
+
+message DeleteInfluxConfigRes {
+  bool success = 1;
+}
+
+message GetInfluxConfigsReq {
+  optional string configName = 1; // if left empty entire list is returned; otherwise specific config is returned
+}
+message  GetInfluxConfigsRes {
+  repeated InfluxConfigName configs = 1;
+}
+
+
+message GetNoRdbmsConfigReq {
+  // left empty intentionally
+}
+
+message GetNoRdbmsConfigRes {
+  repeated NoRdbmsConfig configs = 1;
+}
+message StoreNoRdbmsConfigReq {
+  NoRdbmsConfig config = 1;
+}
+
+//  InfluxConfigName stores the config name, which should be unique, and the corresponding config for the influxdb
+message InfluxConfigName {
+  string configName = 1;
+  InfluxDBConfig config = 2;
+}
+//  influxdb configuration
+message InfluxDBConfig {
+  string serverUrl = 1;
+  string organization = 2 ;
+  string bucket = 3;
+  string influxLocalToken = 4;
+  int32 retentionPeriodHours = 5;
+}
+// DB configuration for a NoRdbms DB
+message NoRdbmsConfig {
+  string connURL = 1;
+  string dbName = 2;
+  optional  string username = 3;
+  optional  string password = 4;
+  int64 maxPoolSize = 5;
+  int64 connectTimeout = 6;
+  dataStorageType.v0.DataStorageTypes dataStorageType = 7; // defines the storage type for the agent data storage
+  string authSource = 8; // defines the auth source for the MongoDb connection
+  repeated InfluxConfigName influxConfigNames = 9; // defines the influxdb config and a corresponding config ID/name to uniquely identify the config
+}
+
+message StoreNoRdbmsConfigRes {
+  bool success = 1;
+}
