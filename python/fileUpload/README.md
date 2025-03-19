@@ -17,3 +17,28 @@ In case of compiling the files inside protos/* locally move the compiled files t
 ```
 python3 main.py
 ```
+## Output
+```
+== Login ==
+ 
+user:  mrx@fexbox.org
+login successful
+ 
+== setting persistence and autodir ==
+ 
+persistence is set to True
+autoDir is set to True
+ 
+== file upload starts ==
+ 
+ uploading file: file2.txt, at location: datastore/file2.txt
+ file:  file2.txt, is successfully uploaded
+ 
+ uploading file: file1.txt, at location: datastore/file1.txt
+ file:  file1.txt, is successfully uploaded
+ 
+ uploading file: sample.txt, at location: datastore/sample.txt
+ file:  sample.txt, is successfully uploaded
+ 
+== upload complete ==
+```
