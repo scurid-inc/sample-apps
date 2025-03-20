@@ -70,6 +70,7 @@ def Login():
         res = auth_stub.Login(ireq)
     except grpc.RpcError as e:
         print(f'failed logging in: {e.details}')
+        return False
     else:
         print("login successful")
         return res.token
@@ -90,15 +91,19 @@ def SetAgentConfig(persistance,autoDir,creds):
         res = pfv2_stub.ConfigureAgent(ireq,metadata=creds)
     except grpc.RpcError as e:
         print(f'failed setting persistence and autodir : {e.details}')
+        return False
     else:
         print("persistence is set to True")
         print("autoDir is set to True")
+        return True
 
 
 # Get context token
 def apit_context_with_token():
     # Get the token from the server (use your actual method here)
     token_from_server = Login()
+    if token_from_server == False:
+        return False
 
     # Create metadata containing the authorization token
     metadata_with_token = (('authorization', f'{token_from_server}'),)
@@ -125,34 +130,39 @@ def generate_upload_requests(file_info,file_path):
                 agentPath=pathonagent,
                 userUploadPath=dirpath
             )
-
-# Make the RPC call, passing the metadata with the context token
-try:
-    print("== Login ==")
-    print(" ")
-    creds = apit_context_with_token()
-
-    SetAgentConfig(persist_on,autoDir_on,creds)
-    #Iterate over each file in the dir and upload
-    files=list_files_in_directory(dirpath)
-    print(" ")
-    print("== file upload starts ==")
-    for file_path, file_name in files:
+            
+if __name__ == '__main__':
+    # Make the RPC call, passing the metadata with the context token
+    try:
+        print("== Login ==")
         print(" ")
-        print(f" uploading file: {file_name}, at location: {file_path}")
-        # Create the FileInfo object for metadata
-        file_info = compiled_protos.platformapi_pb2.FileInfo(
-            deviceIdentity=agentDID,  # Use the correct device identity
-            fileId=file_name,
-            fileType=os.path.splitext(file_name)[1]  # Extract the file extension (e.g., '.txt')
-        )
-        response = stub.UploadFiles(generate_upload_requests(file_info,file_path),metadata=creds)
-        if response.result == True:
-            print(f" file:  {file_name}, is successfully uploaded")
-        else:
-            print(" response: ", response)
-    print(" ")
-    print("== upload complete ==")
-except grpc.RpcError as e:
-    print(f"RPC failed with status code {e.code()}: {e.details()}")
-    print("Error traceback:", e.debug_error_string())
+        creds = apit_context_with_token()
+        if creds == False:
+            exit()
+
+        res = SetAgentConfig(persist_on,autoDir_on,creds)
+        if res == False:
+            exit()
+        #Iterate over each file in the dir and upload
+        files=list_files_in_directory(dirpath)
+        print(" ")
+        print("== file upload starts ==")
+        for file_path, file_name in files:
+            print(" ")
+            print(f" uploading file: {file_name}, at location: {file_path}")
+            # Create the FileInfo object for metadata
+            file_info = compiled_protos.platformapi_pb2.FileInfo(
+                deviceIdentity=agentDID,  # Use the correct device identity
+                fileId=file_name,
+                fileType=os.path.splitext(file_name)[1]  # Extract the file extension (e.g., '.txt')
+            )
+            response = stub.UploadFiles(generate_upload_requests(file_info,file_path),metadata=creds)
+            if response.result == True:
+                print(f" file:  {file_name}, is successfully uploaded")
+            else:
+                print(" response: ", response)
+        print(" ")
+        print("== upload complete ==")
+    except grpc.RpcError as e:
+        print(f"RPC failed with status code {e.code()}: {e.details()}")
+        print("Error traceback:", e.debug_error_string())
