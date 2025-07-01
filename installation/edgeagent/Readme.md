@@ -42,7 +42,7 @@ install.sh --url "https://example.com/custom-agent"
 | `--name` | Name of the agent instance. Overrides environment values. | `scurid-edge-agent-1` or value from `.env` (`EDGE_ID`)                                            |
 
 
-## Download for different linux flavours and architecture Edge Agent v24.1.0.0
+## Download for different linux flavours and architecture Edge Agent v25.1.2.0
 
 NOTE: These are provided for quick easy access. For the latest version, please refer to the [Scurid Edge Agent Releases](https://www.scurid.com/downloads)
 
