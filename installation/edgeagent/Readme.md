@@ -44,27 +44,26 @@ install.sh --url "https://example.com/custom-agent"
 
 ## Download for different linux flavours and architecture Edge Agent v24.1.0.0
 
+NOTE: These are provided for quick easy access. For the latest version, please refer to the [Scurid Edge Agent Releases](https://www.scurid.com/downloads)
+
 | Platform      | URL |
 |---------------|-----|
-| freebsd-amd64 | https://storage.googleapis.com/scurid-artifacts/edgeagent/v24.1.0.0/scuridedgeagent-freebsd-amd64 |
-| freebsd-arm5   | https://storage.googleapis.com/scurid-artifacts/edgeagent/v24.1.0.0/scuridedgeagent-freebsd-arm5|
-| freebsd-arm6    | https://storage.googleapis.com/scurid-artifacts/edgeagent/v24.1.0.0/scuridedgeagent-freebsd-arm6|
-| freebsd-arm7    | https://storage.googleapis.com/scurid-artifacts/edgeagent/v24.1.0.0/scuridedgeagent-freebsd-arm7|
-| linux-386    | https://storage.googleapis.com/scurid-artifacts/edgeagent/v24.1.0.0/scuridedgeagent-linux-386|
-| linux-amd64     | https://storage.googleapis.com/scurid-artifacts/edgeagent/v24.1.0.0/scuridedgeagent-linux-amd64|
-| linux-arm5   | https://storage.googleapis.com/scurid-artifacts/edgeagent/v24.1.0.0/scuridedgeagent-linux-arm5|
-| linux-arm6    | https://storage.googleapis.com/scurid-artifacts/edgeagent/v24.1.0.0/scuridedgeagent-linux-arm6|
-| linux-arm64    | https://storage.googleapis.com/scurid-artifacts/edgeagent/v24.1.0.0/scuridedgeagent-linux-arm64|
-| linux-arm7   | https://storage.googleapis.com/scurid-artifacts/edgeagent/v24.1.0.0/scuridedgeagent-linux-arm7|
-| linux-mips64   | https://storage.googleapis.com/scurid-artifacts/edgeagent/v24.1.0.0/scuridedgeagent-linux-mips64|
-| linux-mips64le  | https://storage.googleapis.com/scurid-artifacts/edgeagent/v24.1.0.0/scuridedgeagent-linux-mips64le|
-| linux-ppc64| https://storage.googleapis.com/scurid-artifacts/edgeagent/v24.1.0.0/scuridedgeagent-linux-ppc64|
-| linux-ppc64le   | https://storage.googleapis.com/scurid-artifacts/edgeagent/v24.1.0.0/scuridedgeagent-linux-ppc64le|
-| netbsd-amd64 | https://storage.googleapis.com/scurid-artifacts/edgeagent/v24.1.0.0/scuridedgeagent-netbsd-amd64|
-| netbsd-arm5   | https://storage.googleapis.com/scurid-artifacts/edgeagent/v24.1.0.0/scuridedgeagent-netbsd-arm5|
-| netbsd-arm6  | https://storage.googleapis.com/scurid-artifacts/edgeagent/v24.1.0.0/scuridedgeagent-netbsd-arm6|
-| netbsd-arm7| https://storage.googleapis.com/scurid-artifacts/edgeagent/v24.1.0.0/scuridedgeagent-netbsd-arm7|
-| openbsd-amd64   | https://storage.googleapis.com/scurid-artifacts/edgeagent/v24.1.0.0/scuridedgeagent-openbsd-amd64|
+| freebsd-amd64 | https://storage.googleapis.com/scurid-artifacts/edgeagent/v25.1.2.0/v25.1.2.0-freebsd-amd64 |
+| freebsd-arm5   | https://storage.googleapis.com/scurid-artifacts/edgeagent/v25.1.2.0/v25.1.2.0-freebsd-arm5|
+| freebsd-arm7    | https://storage.googleapis.com/scurid-artifacts/edgeagent/v25.1.2.0/v25.1.2.0-freebsd-arm7|
+| linux-amd64     | https://storage.googleapis.com/scurid-artifacts/edgeagent/v25.1.2.0/v25.1.2.0-linux-amd64|
+| linux-arm5   | https://storage.googleapis.com/scurid-artifacts/edgeagent/v25.1.2.0/v25.1.2.0-linux-arm5|
+| linux-arm6    | https://storage.googleapis.com/scurid-artifacts/edgeagent/v25.1.2.0/v25.1.2.0-linux-arm6|
+| linux-arm64    | https://storage.googleapis.com/scurid-artifacts/edgeagent/v25.1.2.0/v25.1.2.0-linux-arm64|
+| linux-arm7   | https://storage.googleapis.com/scurid-artifacts/edgeagent/v25.1.2.0/v25.1.2.0-linux-arm7|
+| linux-mips64   | https://storage.googleapis.com/scurid-artifacts/edgeagent/v25.1.2.0/v25.1.2.0-linux-mips64|
+| linux-mips64le  | https://storage.googleapis.com/scurid-artifacts/edgeagent/v25.1.2.0/v25.1.2.0-linux-mips64le|
+| linux-ppc64| https://storage.googleapis.com/scurid-artifacts/edgeagent/v25.1.2.0/v25.1.2.0-linux-ppc64|
+| linux-ppc64le   | https://storage.googleapis.com/scurid-artifacts/edgeagent/v25.1.2.0/v25.1.2.0-linux-ppc64le|
+| netbsd-amd64 | https://storage.googleapis.com/scurid-artifacts/edgeagent/v25.1.2.0/v25.1.2.0-netbsd-amd64|
+| netbsd-arm6  | https://storage.googleapis.com/scurid-artifacts/edgeagent/v25.1.2.0/v25.1.2.0-netbsd-arm6|
+| netbsd-arm7| https://storage.googleapis.com/scurid-artifacts/edgeagent/v25.1.2.0/v25.1.2.0-netbsd-arm7|
+| openbsd-amd64   | https://storage.googleapis.com/scurid-artifacts/edgeagent/v25.1.2.0/v25.1.2.0-openbsd-amd64|
 
 
 
