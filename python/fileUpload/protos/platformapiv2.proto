@@ -1,0 +1,465 @@
+syntax = "proto3";
+import "google/api/annotations.proto";
+import "deviceContext.proto";
+import "log.proto";
+import "integration.proto";
+import "signature.proto";
+import "user.proto";
+import "storageSchemaMetadata.proto";
+import "release.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "dataStorageType.proto";
+import "metadata/metadata.proto";
+import "noRdbmsConfig.proto";
+import "did.proto";
+import "platformInternal.proto";
+package platform.v2;
+
+option go_package = "bitbucket.org/scurid/scurid-apis/pkg/grpc/platform/v2";
+
+// This API is to be used by :
+// * Scurid Edge Agent when attempting to communicate with Scurid SSI Service, as edge agents will usually not connect to the SSI Service, therefore ScuridPlatformAgentAPI works as a central administration hub for customers to manage their devices
+// * Desktop apps
+// * Custom application
+// This is the v2 of the platform api and will only contain new & breaking changes to the platformapi.proto to be backward compatible.
+
+service Platform {
+
+  // Fetches details available on a given identity in local DB storage
+  // it can be used for any kind of identity i.e.approved, rejected or pending
+  // GetIdentityInfo is currently under development do not use //
+  rpc GetIdentityInfo (GetIdentityInfoReq) returns (GetIdentityInfoRes) {
+    option (google.api.http) = {
+      get: "/v2/platform/getIdentityinfo/{did}"
+    };
+    option (metadata.v0.operationType) = READ;
+  };
+
+  // GetAgentsList returns list of all agents along with their details
+  rpc GetAgentsList (GetAgentsListReq) returns (stream GetAgentsListRes){
+    option (google.api.http) = {
+      get: "/v2/platform/getagentslist"
+    };
+    option (metadata.v0.operationType) = READ;
+  };
+  // GetAgentInfo returns detail about individual agent identity
+  rpc GetAgentInfo (GetAgentInfoReq) returns (GetAgentInfoRes){
+    option (google.api.http) = {
+      get: "/v2/platform/getagentinfo"
+    };
+    option (metadata.v0.operationType) = READ;
+  };
+  // RegisterAgent approves a pending agent in the system
+  rpc RegisterAgent(RegisterAgentReq)returns (RegisterAgentRes) {
+    option (google.api.http) = {
+      post: "/v2/platform/registeragent"
+    };
+    option (metadata.v0.operationType) = WRITE;
+  };
+  // RevokeAgent revokes an agent's identity
+  rpc RevokeAgent(RevokeAgentReq) returns (RevokeAgentRes){
+    option (google.api.http) = {
+      post: "/v2/platform/revokeagent"
+    };
+    option (metadata.v0.operationType) = UPDATE;
+  }
+  // VerifyAgent verifies agent's authenticity against the Scurid SSI service
+  rpc VerifyAgent(VerifyAgentReq) returns (VerifyAgentRes){
+    option (google.api.http) = {
+      post: "/v2/platform/verifyagent"
+    };
+    option (metadata.v0.operationType) = READ;
+  }
+
+  // ConfigureAgent helps modify Scurid Edge Agent behaviour
+  rpc ConfigureAgent(ConfigureAgentReq)returns(ConfigureAgentRes){
+    option (google.api.http) = {
+      post: "/v2/platform/configureagent"
+    };
+    option (metadata.v0.operationType) = WRITE;
+    option (metadata.v0.operationType) = UPDATE;
+  }
+
+
+}
+
+// Provides configuration possibilities for different components in the system
+service Subsystems{
+  // GetIDSettings gets currently stored settings about IDs
+  rpc GetIDSettings (GetIDSettingsReq) returns (GetIDSettingsRes){
+    option (metadata.v0.operationType) = READ;
+  };
+  //  SetIDSettings sets up different settings
+  rpc SetIDSettings (SetIDSettingsReq) returns (SetIDSettingsRes){
+    option (metadata.v0.operationType) = WRITE;
+    option (metadata.v0.operationType) = UPDATE;
+  };
+  // GetIdentityLog provides list of log recorded on activities performed on identities. This covers both agent and non agent identities.
+  rpc GetIdentityLog (GetIdentityLogReq) returns (stream GetIdentityLogRes){
+    option (metadata.v0.operationType) = READ;
+  };
+  // RecordAppLogs records Scurid App logs
+  rpc RecordAppLogs (RecordAppLogsReq) returns (RecordAppLogsRes){
+    option (metadata.v0.operationType) = WRITE;
+  };
+  // GetAppLogs fetches app log persisted as history
+  rpc GetAppLogs (GetAppLogsReq) returns (stream GetAppLogsRes){
+    option (metadata.v0.operationType) = READ;
+  };
+  // Stores Integration configuration in Scurid Server storage
+  // This is a global configuration and will be used by all identities
+  rpc StoreIntegrationConfig (StoreIntegrationConfigReq) returns (StoreIntegrationConfigRes) {
+    option (metadata.v0.operationType) = WRITE;
+    option (metadata.v0.operationType) = UPDATE;
+  };
+  // GetIntegrationConfig fetches currently stored integration configuration from Scurid Server
+  // This is a global configuration and will be used by all identities
+  rpc GetIntegrationConfig (GetIntegrationConfigReq) returns (GetIntegrationConfigRes) {
+    option (metadata.v0.operationType) = READ;
+  };
+  // Stores the user onboarding information created
+  rpc StoreAppOnboardingInfo (StoreAppOnboardingInfoReq) returns (StoreAppOnboardingInfoRes) {
+    option (metadata.v0.operationType) = WRITE;
+    option (metadata.v0.operationType) = UPDATE;
+  };
+  // Fetches the user onboarding information created
+  rpc GetAppOnboardingInfo (GetAppOnboardingInfoReq) returns (GetAppOnboardingInfoRes) {
+    option (metadata.v0.operationType) = READ;
+  };
+  // Creates a new App User in the Scurid Server
+  rpc CreateUser(CreateUserReq) returns (CreateUserRes) {
+    option (metadata.v0.operationType) = WRITE;
+  };
+  // Sends invite to a new user
+  rpc InviteUser(InviteUserReq) returns (InviteUserRes) {
+    option (metadata.v0.operationType) = WRITE;
+  };
+  // GetUsers returns list of users
+  rpc GetUsers(GetUsersReq) returns (stream GetUsersRes) {
+    option (metadata.v0.operationType) = READ;
+  };
+  // DeleteUser deletes a user
+  rpc DeleteUser(DeleteUserReq) returns (DeleteUserRes) {
+    option (metadata.v0.operationType) = DELETE;
+  };
+  // GetUserInfo returns user info
+  rpc GetUserInfo(GetUserInfoReq) returns (GetUserInfoRes) {
+    option (metadata.v0.operationType) = READ;
+  };
+  // Resets the password of a user
+  rpc ResetPassword(ResetPasswordReq) returns (ResetPasswordRes) {
+    option (metadata.v0.operationType) = UPDATE;
+  };
+  // UpdateUserPassword updates the user
+  rpc UpdateUserPassword(UpdateUserPasswordReq) returns (UpdateUserPasswordRes) {
+    option (metadata.v0.operationType) = UPDATE;
+  };
+  // Get versions list
+  rpc GetReleases(GetReleasesReq) returns (GetReleasesRes) {
+    option (metadata.v0.operationType) = READ;
+  }
+  // Called by clients to Download file(s)
+  rpc Download(DownloadReq) returns (stream DownloadRes) {
+    option (metadata.v0.operationType) = READ;
+  }
+  // Request to download a zip file, containing all the files in the release from Edge Agent, Server & App etc.
+  // Request only need the version number
+  rpc DownloadReleaseZip(DownloadReleaseZipReq) returns (stream DownloadReleaseZipRes) {
+    option (metadata.v0.operationType) = READ;
+  };
+  // RequestRegistrationCode generates a registration code for the user
+  // Call this API if the code which user has, has already expire or is invalid
+  rpc RequestRegistrationCode(RequestRegistrationCodeReq) returns (RequestRegistrationCodeRes) {
+    option (metadata.v0.operationType) = READ;
+  };
+}
+message RequestRegistrationCodeReq {
+  string email = 1;
+}
+message RequestRegistrationCodeRes {
+  bool result = 1; // if a valid email was received server will send a code and return here true; else false
+}
+message DownloadReq {
+  repeated release.Asset asset = 1;
+}
+message DownloadRes {
+  release.DownloadVersion version = 1;
+}
+message GetReleasesReq {
+  google.protobuf.Timestamp timestamp = 1; // use this to filter the releases; field is optional
+  google.protobuf.StringValue version = 2; // use this to filter the releases; if not provided, field is optional
+}
+message DownloadReleaseZipRes {release.CompleteReleaseZip file = 1;}
+message DownloadReleaseZipReq {string version = 1;}
+
+message GetReleasesRes{
+  repeated release.ReleaseStruct list = 1;
+}
+
+message ResetPasswordReq {
+  string email = 1;
+}
+
+message ResetPasswordRes {
+  bool result = 1; // if a valid email was received server will send a code and return here true; else false
+}
+
+message UpdateUserPasswordReq {
+  string email = 1;
+  string code = 2;
+  bytes newPassword = 3;
+}
+
+message UpdateUserPasswordRes {
+  bool result = 1; // if user was updated successfully return true; else false
+}
+
+message GetUserInfoReq {
+  string email = 1;
+}
+message GetUserInfoRes {
+  user.v1.UserData userData = 1;
+  user.v1.UserOperation userOperation = 3;
+  user.v1.RoleAndPermissionForUser roleAndPermission = 4;
+  string inviteKey = 5; // this is the key that will be used to invite the user, and would have been sent to the user when sending the invite.
+}
+message DeleteUserReq {
+  string email = 1;
+}
+
+message DeleteUserRes {
+  bool result = 1;
+}
+
+message GetUsersReq {
+  // left empty
+}
+
+
+message GetUsersRes {
+  UserInfo  userInfo = 1;
+}
+message UserInfo {
+  string username = 1; // this is the username which could be DID, email address , or username
+  string role = 2 ; // this is th role assigned to the user
+  string userInviteStatus = 3; // this is the status of the user was invited and has not accepted the invite or not
+  string email = 4; // this is the email address for the user
+}
+message CreateUserReq {
+  user.v1.User user = 1;
+  user.v1.UserData userData = 2;
+  string inviteKey = 3; // this is the key that will be used to invite the user, and would have been sent to the user when sending the invite.
+}
+message CreateUserRes{
+  bool result = 1;
+}
+
+message InviteUserReq {
+  user.v1.UserInvite userInvite = 1;
+}
+
+message InviteUserRes {
+  bool result = 1;
+}
+message ScuridAppOnboardingInfo{
+  string onboardingInfo = 1; // this must be a json formatted string
+}
+message StoreAppOnboardingInfoReq {
+  string platformIdentity = 1;
+  ScuridAppOnboardingInfo onboardingInfo = 2;
+}
+
+message StoreAppOnboardingInfoRes {
+  bool result = 1;
+}
+
+message GetAppOnboardingInfoReq {
+  string platformIdentity = 1;
+}
+
+message GetAppOnboardingInfoRes {
+  ScuridAppOnboardingInfo onboardingInfo = 2;
+}
+
+message ConfigureAgentReq{
+  // AgentID is the DID of the agent to be configured
+  string agentID = 1;
+  // IntegrationDetails is the configuration to be applied to the agent
+  integration.IntegrationDetails integrationDetails = 2;
+  //agentAlias custom alias for the agent
+  string agentAlias = 3;
+  // defines the storage schema structure applied to the agent data storage
+  // making this an array enhanced to support SP-752
+  repeated storageSchemaMetadata.SchemaMetadataStruct storeSchemaMetadata = 4;
+  // defines the storage table name for the agent data storage
+  // this will be used for creating the database table name; in reference to the RDBMS storage structure
+  // making this an array enhanced to support SP-752
+  repeated string storageTableName = 5 ;
+
+  dataStorageType.v0.DataStorageTypes dataStorageType = 6; // defines the storage type for the agent data storage
+
+  repeated user.v1.DeviceUsers deviceUsers = 7; // this is the list of human users who can access the agent, being introduced for the extended usecase where device users will login with biometric
+
+  optional noRdbmsConfig.v0.InfluxConfigName influxConfigName = 8; // defines the influxdb config and a corresponding config ID/name to uniquely identify the config. Use this only when Agent is configured with InfluxDB
+
+  optional platformInternal.DeviceFileDownloadConfig deviceFileDownloadConfig = 9; // defines the configuration for the agent to download files from the server
+
+}
+
+
+message ConfigureAgentRes{
+  // Status is the status of the configuration operation
+  bool status = 1;
+}
+
+// StoreIntegrationConfigReq send one or all config at once
+message StoreIntegrationConfigReq {
+  integration.ThingWorx thingworx = 1;
+  integration.Hawkbit hawkbit = 2;
+  integration.Azure azure = 3;
+}
+
+message StoreIntegrationConfigRes {
+  bool result = 1; // default is false, if successful returns True
+};
+
+message GetIntegrationConfigReq {
+  // left empty
+}
+
+message GetIntegrationConfigRes {
+  integration.ThingWorx thingworx = 1;
+  integration.Hawkbit hawkbit = 2;
+  integration.Azure azure = 3;
+};
+
+message GetAppLogsReq {
+  log.LogRange range = 1;
+}
+
+message  GetAppLogsRes {
+  log.AppLog log = 1; // returns log structure
+}
+
+message RecordAppLogsReq {
+  log.AppLog log = 1; // app log structure
+}
+message RecordAppLogsRes{
+  bool res = 1;
+}
+
+message GetIdentityLogReq {
+  log.LogRange range = 1;
+}
+
+message  GetIdentityLogRes{
+  log.IdentityLog log = 1;
+}
+
+// request message for GetIdentityInfo
+message GetIdentityInfoReq {
+  string did = 1; // identity in the format did:scurid:<publicKey>
+}
+// response message for GetIdentityInfo
+message GetIdentityInfoRes {
+  string vInfo = 1; // edge agent version used for creating DID
+  int64 lastVerifiedOn = 2; // Unix timestamp when an identity was last verified with the SSI Service
+  int64 createdOn = 3; // Unix timestamp when identity was created
+  int64 rejectedOn = 4; // Unix timestamp when identity was rejected
+  string deviceName = 5; // alias name for the device, defined by the user or system
+  bool isLocal = 6; // if checked identities are not registered on DLT but only local database
+  string path = 7; // device pkg file store for staging client files
+  repeated string tags = 8; // provides list of tags attached the identity
+  int64 pendingSince = 9; // Unix timestamp since identity has been pending for action
+  deviceContext.DeviceContext deviceContext = 10; // helps to onboard and bind a device to an identity
+}
+
+message GetIDSettingsReq{
+  // left empty intentionally
+}
+message GetIDSettingsRes{
+  bool autoApproveDeviceID = 1; // if enabled, new incoming device identities (which usually end up in pending) belonging to existing approved and valid agents will be automatically approved; default is false
+}
+
+message SetIDSettingsReq{
+  bool autoApproveDeviceID = 1; // if enabled, new incoming device identities (which usually end up in pending) belonging to existing approved and valid agents will be automatically approved; default is false
+}
+// SetIDSettingsRes is the response from the backend
+message SetIDSettingsRes{
+  bool result = 1; // returns true if successful
+}
+
+//GetAgentsListReq
+message GetAgentsListReq{
+  optional did.DIDStatus agentStatus = 1;
+  // intentionally left empty
+}
+
+message GetAgentsListRes {
+  AgentsStruct agent = 1; // array of all the agents along with their details
+}
+message AgentsStruct{
+  string agentVersion = 1;             // version of the Scurid Edge Agent
+  int64 requestedOn = 2; // date on which Scurid backend received agent's req for reg.
+  deviceContext.DeviceContext deviceContext = 3; // DeviceContext from the hardware on which the agent is running
+  bytes SignatureOnDeviceContext = 4;  // hashed value generated on structure DeviceContext + Requested on + ApprovedOn. THIS is also used as the key which will be delivered to
+  string status = 5;               // current status of the Agent, refer to models/v1/status.go
+  string name = 6; // alias defined for the agent by the user, if none create one for the user
+  int64 revokedOn = 7;// RevokedOn timestamp for agent's identity revocation
+  repeated string devices = 8;// this is the list of identities linked to this agent
+  int64 approvedOn = 9;// Unix time stamp on which agent's approved. If client does not provide this, server timestamp will be attached.
+  string agentIdentity = 10; // agent's identity
+  string platformIdentity = 11; // platform's identity
+  bytes approvalKey = 12 ; // post approval this key is returned to the agent for reference DeviceContext + Requested on + ApprovedOn + Agent's DID. THIS is also used as the key which will be delivered to
+  int64 verifiedOn = 13; // Unix timestamp for verification
+  integration.IntegrationDetails integrationDetails = 14 ; // default is nil, if agent is configured with any integration, this will be populated
+  signature.Signature signatureOnIntegration = 15; // signature of the Scurid Server's identity on the integration details. This is used to verify the integrity of the integration details.
+  repeated storageSchemaMetadata.SchemaMetadataStruct storageSchemas = 16; // default is nil, if agent is configured with any storage schema, this will be populated
+  repeated string storageTableName = 17 ;
+  dataStorageType.v0.DataStorageTypes dataStorageType = 18; // defines the storage type for the agent data storage
+  repeated user.v1.DeviceUsers deviceUsers = 19; // this is the list of human users who can access the agent, being introduced for the extended usecase where device users will login with biometric
+  optional noRdbmsConfig.v0.InfluxConfigName influxConfigName = 20; // defines the influxdb config and a corresponding config ID/name to uniquely identify the config. Use this only when Agent is configured with InfluxDB
+  optional platformInternal.AgentMetadata metadata = 21; // this is the metadata for the agent
+  optional platformInternal.DeviceFileDownloadConfig deviceFileDownloadConfig = 22; // defines the configuration for the agent to download files from the server
+  string userUploadPath = 23; // upload path from the user's device
+}
+
+message GetAgentInfoReq {
+  string agentId = 1; // agent's DID information
+}
+
+message GetAgentInfoRes{
+  AgentsStruct agentInfo = 1; // uses defined AgentsStruct
+}
+//
+message RegisterAgentReq{
+  string agentDID = 1; // this is the identity of the agent, auto generated
+  string platformDID = 2; // this is the platform's identity generated once during user onboarding
+  string name = 3; // optional, an alias for the agent
+  int64 approvedOn = 4; // Unix timestamp, if client won't send any server will assign current timestamp
+}
+
+message RegisterAgentRes{
+  bool result = 1; // true if operation is successful, else false along with error if any
+};
+
+message RevokeAgentReq{
+  string agentDID = 1; // this is the identity of the agent, auto generated
+  string platformDID = 2; // this is the platform's identity generated once during user onboarding
+  string name = 3; // optional, an alias for the agent
+  int64 revokedOn = 4; //  Unix timestamp, if client won't send any server will assign current timestamp
+}
+
+message RevokeAgentRes{
+  bool result = 1; // true if operation is successful, else false along with error if any
+}
+
+message VerifyAgentReq {
+  string agentDID = 1; // this is the identity of the agent, auto generated
+  string platformDID = 2; // this is the platform's identity generated once during user onboarding
+}
+
+message VerifyAgentRes {
+  bool result = 1; // true if status is still approved , else false along with error if any
+}

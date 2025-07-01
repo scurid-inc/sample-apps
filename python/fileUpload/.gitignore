@@ -1,0 +1,3 @@
+certs/ca-cert.pem
+datastore/
+compiled_protos/__pycache__/

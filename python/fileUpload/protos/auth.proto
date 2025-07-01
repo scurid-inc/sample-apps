@@ -1,0 +1,91 @@
+syntax = "proto3";
+import "google/api/annotations.proto";
+import "metadata/metadata.proto";
+package auth.v1;
+
+option go_package = "bitbucket.org/scurid/scurid-apis/pkg/grpc/auth/v1";
+
+// Auth defines authentication service
+service Auth {
+  rpc Login (LoginReq) returns (LoginRes){
+    option (google.api.http) = {
+      post: "/v1/auth/login"
+      body: "*"
+    };
+    option (metadata.v0.operationType) = READ;
+  };
+  rpc SetInitialPassphrase (SetInitialPassphraseReq) returns (SetInitialPassphraseRes){
+    option (google.api.http) = {
+      post: "/v1/auth/setinitialpassphrase"
+      body: "*"
+    };
+    option (metadata.v0.operationType) = WRITE;
+  };
+  rpc StoreUser (StoreUserReq) returns (StoreUserRes){
+    option (google.api.http) = {
+      post: "/v1/auth/storeuser"
+      body: "*"
+    };
+    option (metadata.v0.operationType) = WRITE;
+  };
+  rpc RefreshToken (RefreshTokenReq) returns (RefreshTokenRes){
+    option (google.api.http) = {
+      post: "/v1/auth/refreshtoken"
+      body: "*"
+    };
+    option (metadata.v0.operationType) = READ;
+  };
+  rpc VerifyToken (VerifyTokenReq) returns (VerifyTokenRes){
+    option (google.api.http) = {
+      post: "/v1/auth/verifytoken"
+      body: "*"
+    };
+    option (metadata.v0.operationType) = READ;
+  };
+}
+
+message LoginReq {
+  UserStruct user = 1; // public DID or username
+  string password = 2; // signed public DID + requestTime from the edge agent
+  int64 requestTime = 3; // edge agent's unix int64 UTC timestamp
+}
+
+message UserStruct {
+  string userDID = 1;
+  string username = 2;
+}
+
+message LoginRes {
+  string token = 1;
+}
+
+message StoreUserReq{
+  string key = 1;
+  string value = 2;
+}
+
+message StoreUserRes{
+  bool result = 1;
+}
+
+message SetInitialPassphraseReq {
+  string passphrase = 1;
+}
+message SetInitialPassphraseRes {
+  bool result = 1;
+}
+
+message RefreshTokenReq{
+  string oldToken = 1;
+}
+message RefreshTokenRes {
+  string newToken = 2;
+}
+// Expects token received post login / refresh process
+message VerifyTokenReq {
+  string token = 1;
+}
+// returns True if token is valid, else false
+message VerifyTokenRes{
+  bool res = 1;
+};

@@ -1,0 +1,124 @@
+syntax = "proto3";
+package user.v1;
+import "google/protobuf/timestamp.proto";
+option go_package = "bitbucket.org/scurid/scurid-apis/pkg/grpc/user/v1";
+
+
+message User {
+  string username = 1;
+  bytes password = 2;
+
+}
+message UserOperation{
+  int64 createdOn = 3;
+  int64 updatedOn = 4;
+  string status = 5;
+  int64 invitedOn = 6;
+  int64 inviteAcceptedOn = 7;
+}
+
+enum Domains {
+  Unknown = 0;
+  Logs = 1;
+  Data = 2;
+  Devices = 3; // this will contain Agents and Identities 
+  Settings = 4;
+  Users = 5;
+  AgentAndIdentities = 6;
+  DataStorageConfiguration = 7;
+  Subsystem = 8;
+  AgentsManagement = 9;
+}
+
+enum EndpointGroups{
+  Default = 0;
+  StorageSchemaMetadataService = 1;
+  Platform = 2;
+  DataStorage = 3;
+  Subsystems = 4;
+  AgentManagement = 5;
+  DeviceDataManagement = 6;
+  Auth = 7;
+  UserAgreementAndPricing = 8;
+  ReleaseManagement = 9;
+  GlobalCDBStorage = 10;
+  Certificates = 11;
+  NoRdbmsConfigurationService = 12;
+  ScuridPlatformAgentAPI = 13;
+  CustomSender = 14;
+  RBACService = 15;
+  RDBMSConfigurationService = 16;
+  ReleaseManagementService = 17;
+  Secrets = 18;
+  SSIServiceAPI = 19;
+  ScuridGenerics = 20;
+  Pricing = 21;
+  ServiceAgreement = 22;
+  Biometrics = 23;
+}
+
+// Role enumeration
+// these are only to be used for the default role names
+// this only defines the default role names.
+enum Role {
+  UNKNOWN = 0;
+  GUEST = 1; // this is the default role assigned to newly created human users on the server.
+  STANDARD = 2; // this is a normal user role for the server / app to perform all sorts of usual operations.
+  ADMINISTRATOR = 3; // by default assigned to the Platform ID, and to any user who is the owner of the platform.
+  EDGE = 4; // DEPRECATED : this is only to be backward compatible, should not be used for any new roles.; assigned to devices.
+  NON_EDGE = 5; // DEPRECATED: this is only to be backward compatible, should not be used for any new roles; assigned to the human users.
+  DEVICE = 6; // this is the standard role for the device identities i.e. agents and identities
+  DEVICE_USER = 7; // this is the standard role for the human users assigned to work with the devices; and do not need access to the UI or any of the APIs directly exposed by the server.
+}
+
+// Permissions set for actions that can be performed
+message Permission {
+  bool read = 1;
+  bool write = 2;
+  bool update = 3;
+  bool delete = 4;
+}
+
+message DomainToEndpointsPermissionMap {
+  Domains name = 1;  // e.g. Logs
+  repeated EndpointsPermissionMap endpointsPermissionMap = 2;
+}
+
+message EndpointsPermissionMap {
+  EndpointGroups endpointGroups = 1; // e.g. of this /scuridplatformagentapi.v1.ScuridPlatformAgentAPI/
+  Permission permission = 2; // e.g. read, write, delete
+}
+
+// User RoleWithPermissions with permission and roles
+message RoleWithPermissions {
+  string name = 1; // this must just take string value, the value here can come from ENUM Role, or otherwise the custom roles name defined by the users.
+  PermissionMatrix permissionMatrix = 2;
+}
+
+message PermissionMatrix {
+  repeated DomainToEndpointsPermissionMap domainToEndpointMap = 1;
+}
+
+// User data are all the fields describing a user
+message UserData {
+  string id = 1;
+  string firstName = 2;
+  string lastName = 3;
+  string middleName = 4;
+  string emailAddress = 5;
+}
+// RoleAndPermission matrix assigned to the user
+message RoleAndPermissionForUser {
+  RoleWithPermissions role = 1;
+  google.protobuf.Timestamp IssuedAt = 2;
+  google.protobuf.Timestamp ExpiredAt = 3;
+}
+message UserInvite {
+  UserData userData = 1;
+  string role = 2; // this is the role name that is to be assigned to the user during the invite, if not provided, the default role will be assigned which is Guest.
+}
+
+message DeviceUsers {
+  string email = 1; // email address of the
+  string trustStampSessionID = 2;
+}

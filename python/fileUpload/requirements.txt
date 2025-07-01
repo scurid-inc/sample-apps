@@ -1,0 +1,5 @@
+grpcio==1.71.0
+grpcio-tools==1.71.0
+setuptools==76.1.0
+protobuf==5.28.1
+googleapis-common-protos==1.69.2

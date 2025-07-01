@@ -1,0 +1,24 @@
+syntax = "proto3";
+package log;
+option go_package = "bitbucket.org/scurid/scurid-apis/pkg/grpc/log/v0";
+
+
+
+message AppLog{
+  string type = 1; // INFO, WARN, DEBUG, TRACE, ERROR
+  string message = 2; // string value of the message
+  int64 eventTime = 3; // UNIX NANO timestamp
+}
+
+message LogRange {
+  int64 from = 1; // start timestamp
+  int64 to = 2; // stop timestamp
+}
+
+message IdentityLog {
+  string action = 1; // e.g. approved, revoked, pending or rejected.
+  int64 eventTimestamp = 2; // recorded timestamp of the event
+  string signature = 3; // tamper evident signature on the
+  string platformDID = 4; // user who performed the action -  currently this is going to be the Platform DID
+  string did = 5; // identity for device or agents
+}
