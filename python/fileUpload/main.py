@@ -79,12 +79,16 @@ def SetAgentConfig(persistance,autoDir,creds):
     print(" ")
     print("== setting persistence and autodir ==")
     print(" ")
+    for item in compiled_protos.platformInternal_pb2.DeviceFileDownloadConfig.DESCRIPTOR.fields:
+        print(item.name)
     try:
         ireq = compiled_protos.platformapiv2_pb2.ConfigureAgentReq(
             agentID=agentDID,
             deviceFileDownloadConfig = compiled_protos.platformInternal_pb2.DeviceFileDownloadConfig(
                 autoCreateDir=autoDir,
-                enableStage=persistance
+                enableStage=persistance,
+                userLocalUploadPath=dirpath,
+                downloadPathOnAgent=pathonagent
             )
         )
         res = pfv2_stub.ConfigureAgent(ireq,metadata=creds)
