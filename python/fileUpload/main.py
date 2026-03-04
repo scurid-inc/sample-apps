@@ -79,8 +79,7 @@ def SetAgentConfig(persistance,autoDir,creds):
     print(" ")
     print("== setting persistence and autodir ==")
     print(" ")
-    for item in compiled_protos.platformInternal_pb2.DeviceFileDownloadConfig.DESCRIPTOR.fields:
-        print(item.name)
+
     try:
         ireq = compiled_protos.platformapiv2_pb2.ConfigureAgentReq(
             agentID=agentDID,

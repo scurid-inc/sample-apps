@@ -36,6 +36,10 @@ func main() {
 	authenticateDevice(tokenFromDevice)
 }
 
+<<<<<<< HEAD
+// sslCreds returns the transport credentials for the Scurid Server
+=======
+>>>>>>> 6cf5bb02c4395f2341208dba0458922f2717830d
 func sslCreds(certData []byte) credentials.TransportCredentials {
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(certData) {
