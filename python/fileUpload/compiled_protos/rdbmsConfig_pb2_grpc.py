@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import storageSchemaMetadata_pb2 as storageSchemaMetadata__pb2
+import rdbmsConfig_pb2 as rdbmsConfig__pb2
 
 GRPC_GENERATED_VERSION = '1.78.0'
 GRPC_VERSION = grpc.__version__
@@ -18,14 +18,14 @@ except ImportError:
 if _version_not_supported:
     raise RuntimeError(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + ' but the generated code in storageSchemaMetadata_pb2_grpc.py depends on'
+        + ' but the generated code in rdbmsConfig_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
     )
 
 
-class StorageSchemaMetadataServiceStub(object):
+class RDBMSConfigurationServiceStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -34,59 +34,59 @@ class StorageSchemaMetadataServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.StoreSchemaMetadataStructure = channel.unary_unary(
-                '/storageSchemaMetadata.StorageSchemaMetadataService/StoreSchemaMetadataStructure',
-                request_serializer=storageSchemaMetadata__pb2.StoreSchemaMetadataRequest.SerializeToString,
-                response_deserializer=storageSchemaMetadata__pb2.StoreSchemaMetadataResponse.FromString,
+        self.GetRDBMSConfiguration = channel.unary_unary(
+                '/rdbmsConfig.RDBMSConfigurationService/GetRDBMSConfiguration',
+                request_serializer=rdbmsConfig__pb2.GetRDBMSConfigRequest.SerializeToString,
+                response_deserializer=rdbmsConfig__pb2.GetRDBMSConfigRes.FromString,
                 _registered_method=True)
-        self.GetSchemaMetadataStructure = channel.unary_unary(
-                '/storageSchemaMetadata.StorageSchemaMetadataService/GetSchemaMetadataStructure',
-                request_serializer=storageSchemaMetadata__pb2.GetSchemaMetadataRequest.SerializeToString,
-                response_deserializer=storageSchemaMetadata__pb2.GetSchemaMetadataResponse.FromString,
+        self.StoreRDBMSConfiguration = channel.unary_unary(
+                '/rdbmsConfig.RDBMSConfigurationService/StoreRDBMSConfiguration',
+                request_serializer=rdbmsConfig__pb2.StoreRDBMSConfigReq.SerializeToString,
+                response_deserializer=rdbmsConfig__pb2.StoreRDBMSConfigRes.FromString,
                 _registered_method=True)
 
 
-class StorageSchemaMetadataServiceServicer(object):
+class RDBMSConfigurationServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def StoreSchemaMetadataStructure(self, request, context):
+    def GetRDBMSConfiguration(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def GetSchemaMetadataStructure(self, request, context):
+    def StoreRDBMSConfiguration(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_StorageSchemaMetadataServiceServicer_to_server(servicer, server):
+def add_RDBMSConfigurationServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'StoreSchemaMetadataStructure': grpc.unary_unary_rpc_method_handler(
-                    servicer.StoreSchemaMetadataStructure,
-                    request_deserializer=storageSchemaMetadata__pb2.StoreSchemaMetadataRequest.FromString,
-                    response_serializer=storageSchemaMetadata__pb2.StoreSchemaMetadataResponse.SerializeToString,
+            'GetRDBMSConfiguration': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetRDBMSConfiguration,
+                    request_deserializer=rdbmsConfig__pb2.GetRDBMSConfigRequest.FromString,
+                    response_serializer=rdbmsConfig__pb2.GetRDBMSConfigRes.SerializeToString,
             ),
-            'GetSchemaMetadataStructure': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetSchemaMetadataStructure,
-                    request_deserializer=storageSchemaMetadata__pb2.GetSchemaMetadataRequest.FromString,
-                    response_serializer=storageSchemaMetadata__pb2.GetSchemaMetadataResponse.SerializeToString,
+            'StoreRDBMSConfiguration': grpc.unary_unary_rpc_method_handler(
+                    servicer.StoreRDBMSConfiguration,
+                    request_deserializer=rdbmsConfig__pb2.StoreRDBMSConfigReq.FromString,
+                    response_serializer=rdbmsConfig__pb2.StoreRDBMSConfigRes.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'storageSchemaMetadata.StorageSchemaMetadataService', rpc_method_handlers)
+            'rdbmsConfig.RDBMSConfigurationService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('storageSchemaMetadata.StorageSchemaMetadataService', rpc_method_handlers)
+    server.add_registered_method_handlers('rdbmsConfig.RDBMSConfigurationService', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
-class StorageSchemaMetadataService(object):
+class RDBMSConfigurationService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def StoreSchemaMetadataStructure(request,
+    def GetRDBMSConfiguration(request,
             target,
             options=(),
             channel_credentials=None,
@@ -99,9 +99,9 @@ class StorageSchemaMetadataService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/storageSchemaMetadata.StorageSchemaMetadataService/StoreSchemaMetadataStructure',
-            storageSchemaMetadata__pb2.StoreSchemaMetadataRequest.SerializeToString,
-            storageSchemaMetadata__pb2.StoreSchemaMetadataResponse.FromString,
+            '/rdbmsConfig.RDBMSConfigurationService/GetRDBMSConfiguration',
+            rdbmsConfig__pb2.GetRDBMSConfigRequest.SerializeToString,
+            rdbmsConfig__pb2.GetRDBMSConfigRes.FromString,
             options,
             channel_credentials,
             insecure,
@@ -113,7 +113,7 @@ class StorageSchemaMetadataService(object):
             _registered_method=True)
 
     @staticmethod
-    def GetSchemaMetadataStructure(request,
+    def StoreRDBMSConfiguration(request,
             target,
             options=(),
             channel_credentials=None,
@@ -126,9 +126,9 @@ class StorageSchemaMetadataService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/storageSchemaMetadata.StorageSchemaMetadataService/GetSchemaMetadataStructure',
-            storageSchemaMetadata__pb2.GetSchemaMetadataRequest.SerializeToString,
-            storageSchemaMetadata__pb2.GetSchemaMetadataResponse.FromString,
+            '/rdbmsConfig.RDBMSConfigurationService/StoreRDBMSConfiguration',
+            rdbmsConfig__pb2.StoreRDBMSConfigReq.SerializeToString,
+            rdbmsConfig__pb2.StoreRDBMSConfigRes.FromString,
             options,
             channel_credentials,
             insecure,
