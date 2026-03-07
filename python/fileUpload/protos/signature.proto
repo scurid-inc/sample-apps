@@ -1,9 +1,0 @@
-syntax = "proto3";
-package signature;
-
-option go_package = "bitbucket.org/scurid/scurid-apis/pkg/grpc/signature/v0";
-// defines standard signature for all messages
-message Signature {
-  bytes signature = 1; // Signature of the message
-  int64 utcUnixTimestamp = 2; // UTC timestamp in nanoseconds; captured at the time of signing
-}

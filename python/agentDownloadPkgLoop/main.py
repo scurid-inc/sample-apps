@@ -63,7 +63,7 @@ def downloadpkg(identity,storagePath):
                 print("Download attempt - ",counter)
             except Exception as e:
                 print("error: ",e.details)
-            time.sleep(3)
+            time.sleep(1)
     except grpc.RpcError as e:
         print(f'failed setting: {e.details}')
     else:

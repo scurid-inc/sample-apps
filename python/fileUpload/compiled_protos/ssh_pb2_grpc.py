@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import compiled_protos.auth_pb2 as auth__pb2
+import ssh_pb2 as ssh__pb2
 
 GRPC_GENERATED_VERSION = '1.78.0'
 GRPC_VERSION = grpc.__version__
@@ -18,16 +18,15 @@ except ImportError:
 if _version_not_supported:
     raise RuntimeError(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + ' but the generated code in auth_pb2_grpc.py depends on'
+        + ' but the generated code in ssh_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
     )
 
 
-class AuthStub(object):
-    """Auth defines authentication service
-    """
+class SSHTunnelStub(object):
+    """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
         """Constructor.
@@ -35,109 +34,123 @@ class AuthStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.Login = channel.unary_unary(
-                '/auth.v1.Auth/Login',
-                request_serializer=auth__pb2.LoginReq.SerializeToString,
-                response_deserializer=auth__pb2.LoginRes.FromString,
+        self.Start = channel.unary_unary(
+                '/SSHTunnel/Start',
+                request_serializer=ssh__pb2.StartReq.SerializeToString,
+                response_deserializer=ssh__pb2.StartRes.FromString,
                 _registered_method=True)
-        self.SetInitialPassphrase = channel.unary_unary(
-                '/auth.v1.Auth/SetInitialPassphrase',
-                request_serializer=auth__pb2.SetInitialPassphraseReq.SerializeToString,
-                response_deserializer=auth__pb2.SetInitialPassphraseRes.FromString,
+        self.Stop = channel.unary_unary(
+                '/SSHTunnel/Stop',
+                request_serializer=ssh__pb2.StopReq.SerializeToString,
+                response_deserializer=ssh__pb2.StopRes.FromString,
                 _registered_method=True)
-        self.StoreUser = channel.unary_unary(
-                '/auth.v1.Auth/StoreUser',
-                request_serializer=auth__pb2.StoreUserReq.SerializeToString,
-                response_deserializer=auth__pb2.StoreUserRes.FromString,
+        self.StatusStream = channel.unary_stream(
+                '/SSHTunnel/StatusStream',
+                request_serializer=ssh__pb2.StatusReq.SerializeToString,
+                response_deserializer=ssh__pb2.StatusUpdate.FromString,
                 _registered_method=True)
-        self.RefreshToken = channel.unary_unary(
-                '/auth.v1.Auth/RefreshToken',
-                request_serializer=auth__pb2.RefreshTokenReq.SerializeToString,
-                response_deserializer=auth__pb2.RefreshTokenRes.FromString,
+        self.SessionInfo = channel.unary_unary(
+                '/SSHTunnel/SessionInfo',
+                request_serializer=ssh__pb2.SessionInfoReq.SerializeToString,
+                response_deserializer=ssh__pb2.SessionInfoRes.FromString,
                 _registered_method=True)
-        self.VerifyToken = channel.unary_unary(
-                '/auth.v1.Auth/VerifyToken',
-                request_serializer=auth__pb2.VerifyTokenReq.SerializeToString,
-                response_deserializer=auth__pb2.VerifyTokenRes.FromString,
+        self.ListSessions = channel.unary_unary(
+                '/SSHTunnel/ListSessions',
+                request_serializer=ssh__pb2.ListSessionsReq.SerializeToString,
+                response_deserializer=ssh__pb2.ListSessionsRes.FromString,
+                _registered_method=True)
+        self.DeleteSession = channel.unary_unary(
+                '/SSHTunnel/DeleteSession',
+                request_serializer=ssh__pb2.DeleteSessionReq.SerializeToString,
+                response_deserializer=ssh__pb2.DeleteSessionRes.FromString,
                 _registered_method=True)
 
 
-class AuthServicer(object):
-    """Auth defines authentication service
-    """
+class SSHTunnelServicer(object):
+    """Missing associated documentation comment in .proto file."""
 
-    def Login(self, request, context):
+    def Start(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def SetInitialPassphrase(self, request, context):
+    def Stop(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def StoreUser(self, request, context):
+    def StatusStream(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def RefreshToken(self, request, context):
+    def SessionInfo(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def VerifyToken(self, request, context):
+    def ListSessions(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def DeleteSession(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_AuthServicer_to_server(servicer, server):
+def add_SSHTunnelServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'Login': grpc.unary_unary_rpc_method_handler(
-                    servicer.Login,
-                    request_deserializer=auth__pb2.LoginReq.FromString,
-                    response_serializer=auth__pb2.LoginRes.SerializeToString,
+            'Start': grpc.unary_unary_rpc_method_handler(
+                    servicer.Start,
+                    request_deserializer=ssh__pb2.StartReq.FromString,
+                    response_serializer=ssh__pb2.StartRes.SerializeToString,
             ),
-            'SetInitialPassphrase': grpc.unary_unary_rpc_method_handler(
-                    servicer.SetInitialPassphrase,
-                    request_deserializer=auth__pb2.SetInitialPassphraseReq.FromString,
-                    response_serializer=auth__pb2.SetInitialPassphraseRes.SerializeToString,
+            'Stop': grpc.unary_unary_rpc_method_handler(
+                    servicer.Stop,
+                    request_deserializer=ssh__pb2.StopReq.FromString,
+                    response_serializer=ssh__pb2.StopRes.SerializeToString,
             ),
-            'StoreUser': grpc.unary_unary_rpc_method_handler(
-                    servicer.StoreUser,
-                    request_deserializer=auth__pb2.StoreUserReq.FromString,
-                    response_serializer=auth__pb2.StoreUserRes.SerializeToString,
+            'StatusStream': grpc.unary_stream_rpc_method_handler(
+                    servicer.StatusStream,
+                    request_deserializer=ssh__pb2.StatusReq.FromString,
+                    response_serializer=ssh__pb2.StatusUpdate.SerializeToString,
             ),
-            'RefreshToken': grpc.unary_unary_rpc_method_handler(
-                    servicer.RefreshToken,
-                    request_deserializer=auth__pb2.RefreshTokenReq.FromString,
-                    response_serializer=auth__pb2.RefreshTokenRes.SerializeToString,
+            'SessionInfo': grpc.unary_unary_rpc_method_handler(
+                    servicer.SessionInfo,
+                    request_deserializer=ssh__pb2.SessionInfoReq.FromString,
+                    response_serializer=ssh__pb2.SessionInfoRes.SerializeToString,
             ),
-            'VerifyToken': grpc.unary_unary_rpc_method_handler(
-                    servicer.VerifyToken,
-                    request_deserializer=auth__pb2.VerifyTokenReq.FromString,
-                    response_serializer=auth__pb2.VerifyTokenRes.SerializeToString,
+            'ListSessions': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListSessions,
+                    request_deserializer=ssh__pb2.ListSessionsReq.FromString,
+                    response_serializer=ssh__pb2.ListSessionsRes.SerializeToString,
+            ),
+            'DeleteSession': grpc.unary_unary_rpc_method_handler(
+                    servicer.DeleteSession,
+                    request_deserializer=ssh__pb2.DeleteSessionReq.FromString,
+                    response_serializer=ssh__pb2.DeleteSessionRes.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'auth.v1.Auth', rpc_method_handlers)
+            'SSHTunnel', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('auth.v1.Auth', rpc_method_handlers)
+    server.add_registered_method_handlers('SSHTunnel', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
-class Auth(object):
-    """Auth defines authentication service
-    """
+class SSHTunnel(object):
+    """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def Login(request,
+    def Start(request,
             target,
             options=(),
             channel_credentials=None,
@@ -150,9 +163,9 @@ class Auth(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/auth.v1.Auth/Login',
-            auth__pb2.LoginReq.SerializeToString,
-            auth__pb2.LoginRes.FromString,
+            '/SSHTunnel/Start',
+            ssh__pb2.StartReq.SerializeToString,
+            ssh__pb2.StartRes.FromString,
             options,
             channel_credentials,
             insecure,
@@ -164,7 +177,7 @@ class Auth(object):
             _registered_method=True)
 
     @staticmethod
-    def SetInitialPassphrase(request,
+    def Stop(request,
             target,
             options=(),
             channel_credentials=None,
@@ -177,9 +190,9 @@ class Auth(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/auth.v1.Auth/SetInitialPassphrase',
-            auth__pb2.SetInitialPassphraseReq.SerializeToString,
-            auth__pb2.SetInitialPassphraseRes.FromString,
+            '/SSHTunnel/Stop',
+            ssh__pb2.StopReq.SerializeToString,
+            ssh__pb2.StopRes.FromString,
             options,
             channel_credentials,
             insecure,
@@ -191,7 +204,7 @@ class Auth(object):
             _registered_method=True)
 
     @staticmethod
-    def StoreUser(request,
+    def StatusStream(request,
             target,
             options=(),
             channel_credentials=None,
@@ -201,12 +214,12 @@ class Auth(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(
+        return grpc.experimental.unary_stream(
             request,
             target,
-            '/auth.v1.Auth/StoreUser',
-            auth__pb2.StoreUserReq.SerializeToString,
-            auth__pb2.StoreUserRes.FromString,
+            '/SSHTunnel/StatusStream',
+            ssh__pb2.StatusReq.SerializeToString,
+            ssh__pb2.StatusUpdate.FromString,
             options,
             channel_credentials,
             insecure,
@@ -218,7 +231,7 @@ class Auth(object):
             _registered_method=True)
 
     @staticmethod
-    def RefreshToken(request,
+    def SessionInfo(request,
             target,
             options=(),
             channel_credentials=None,
@@ -231,9 +244,9 @@ class Auth(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/auth.v1.Auth/RefreshToken',
-            auth__pb2.RefreshTokenReq.SerializeToString,
-            auth__pb2.RefreshTokenRes.FromString,
+            '/SSHTunnel/SessionInfo',
+            ssh__pb2.SessionInfoReq.SerializeToString,
+            ssh__pb2.SessionInfoRes.FromString,
             options,
             channel_credentials,
             insecure,
@@ -245,7 +258,7 @@ class Auth(object):
             _registered_method=True)
 
     @staticmethod
-    def VerifyToken(request,
+    def ListSessions(request,
             target,
             options=(),
             channel_credentials=None,
@@ -258,9 +271,36 @@ class Auth(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/auth.v1.Auth/VerifyToken',
-            auth__pb2.VerifyTokenReq.SerializeToString,
-            auth__pb2.VerifyTokenRes.FromString,
+            '/SSHTunnel/ListSessions',
+            ssh__pb2.ListSessionsReq.SerializeToString,
+            ssh__pb2.ListSessionsRes.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def DeleteSession(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/SSHTunnel/DeleteSession',
+            ssh__pb2.DeleteSessionReq.SerializeToString,
+            ssh__pb2.DeleteSessionRes.FromString,
             options,
             channel_credentials,
             insecure,
