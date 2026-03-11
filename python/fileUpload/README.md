@@ -9,12 +9,6 @@ pip3 install -r requirements.txt
 1. The Scurid Server shall be up and running. See [here](https://docs.scurid.com/v23.0.2.1/quickstart/quickstart-on-premise/#download-scurid-server) for details.
 2. The Scurid App is onboarded and is connected to the Scurid Server. See [here](https://docs.scurid.com/v23.0.2.1/quickstart/quickstart-on-premise/#download-scurid-edge-agent) for details.
 3. The Scurid Edge Agent is up and Approved by the Scurid App. See [here](https://docs.scurid.com/v23.0.2.1/quickstart/quickstart-on-premise/#step-2-launching-scurid-server-and-app) for details.
-<<<<<<< HEAD
-
-## Steps to execute the example
-```
-python3 main.py
-=======
 4. Set parameters in the secret/config.ini file.
 
 ## Note
@@ -47,5 +41,4 @@ autoDir is set to True
  file:  sample.txt, is successfully uploaded
  
 == upload complete ==
->>>>>>> aff7a6e7aefe2bc00427f5af731a47552bd0fe29
 ```
