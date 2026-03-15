@@ -1,11 +1,4 @@
-<<<<<<< HEAD
 grpcio==1.78.0
 grpcio-tools==1.78.0
 protobuf==6.31.1
-=======
-grpcio==1.71.0
-grpcio-tools==1.71.0
-setuptools==76.1.0
-protobuf==5.28.1
->>>>>>> aff7a6e7aefe2bc00427f5af731a47552bd0fe29
 googleapis-common-protos==1.69.2
