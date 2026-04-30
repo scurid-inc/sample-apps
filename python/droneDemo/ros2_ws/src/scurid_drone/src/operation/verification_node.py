@@ -88,14 +88,14 @@ class VerificationNode(DIDNode):
             "did": str(did),
         }
 
-        self.get_logger().info(f"Writing rejected command event to {self.rejected_command_log}")
+        # self.get_logger().info(f"Writing rejected command event to {self.rejected_command_log}")
 
         try:
             with open(self.rejected_command_log, "a", encoding="utf-8") as f:
                 f.write(json.dumps(event, separators=(",", ":")) + "\n")
-            self.get_logger().info("Rejected command event written")
-        except Exception as e:
-            self.get_logger().error(f"Failed to write rejected command event: {e}")
+            # self.get_logger().info("Rejected command event written")
+        except Exception:
+            pass
 
     def _render_ui(self):
         cols, rows = shutil.get_terminal_size(fallback=(80, 24))

@@ -17,5 +17,4 @@ setup(
     maintainer_email='ditlev.andersen@scurid.com',
     description='Shared utility functions for Scurid ROS2 nodes',
     license='There is none',
-    tests_require=['pytest'],
 )
