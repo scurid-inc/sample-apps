@@ -51,6 +51,12 @@ class PositionRelay(Node):
             '/fmu/out/vehicle_local_position',
             self.local_position_callback, 
             qos_profile)
+        
+        self.pos_sub_v1 = self.create_subscription(
+            VehicleLocalPosition, 
+            '/fmu/out/vehicle_local_position_v1',
+            self.local_position_callback, 
+            qos_profile)
 
         self.pos_pub = self.create_publisher(
             PoseStamped, 

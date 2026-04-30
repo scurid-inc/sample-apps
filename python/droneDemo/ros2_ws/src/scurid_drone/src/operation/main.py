@@ -12,6 +12,8 @@ Author: Erik Winkler
 Date: 13.03.2026
 """
 
+# MicroXRCEAgent serial --dev /dev/ttyUSB0 -b 921600
+
 ###############################################
 # Standard Imports                            #
 ###############################################
@@ -62,14 +64,14 @@ class ScuridDrone(Node):
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
             durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
             history=QoSHistoryPolicy.KEEP_LAST,
-            depth=0,
+            depth=1,
         )
 
         qos_profile_sub = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
             durability=QoSDurabilityPolicy.VOLATILE,
             history=QoSHistoryPolicy.KEEP_LAST,
-            depth=0,
+            depth=1,
         )
 
         # ── Publishers ──────────────────────────────────────────
@@ -81,17 +83,25 @@ class ScuridDrone(Node):
             VehicleCommand, '/fmu/in/vehicle_command', qos_profile_pub)
 
         # ── Subscribers (PX4) ───────────────────────────────────
+        self.status_sub_v3 = self.create_subscription(
+            VehicleStatus, '/fmu/out/vehicle_status_v3',
+            self.vehicle_status_callback, qos_profile_sub)
+        
         self.status_sub = self.create_subscription(
             VehicleStatus, '/fmu/out/vehicle_status',
             self.vehicle_status_callback, qos_profile_sub)
 
+        self.local_pos_sub_v1 = self.create_subscription(
+            VehicleLocalPosition, '/fmu/out/vehicle_local_position_v1',
+            self.local_position_callback, qos_profile_sub)
+        
         self.local_pos_sub = self.create_subscription(
             VehicleLocalPosition, '/fmu/out/vehicle_local_position',
             self.local_position_callback, qos_profile_sub)
 
-        self.global_pos_sub = self.create_subscription(
-            VehicleGlobalPosition, '/fmu/out/vehicle_global_position',
-            self.global_pos_callback, qos_profile_sub)
+        # self.global_pos_sub = self.create_subscription(
+        #     VehicleGlobalPosition, '/fmu/out/vehicle_global_position',
+        #     self.global_pos_callback, qos_profile_sub)
 
         self.attitude_sub = self.create_subscription(
             VehicleAttitude, '/fmu/out/vehicle_attitude',
@@ -109,7 +119,9 @@ class ScuridDrone(Node):
 
         # ── State variables ─────────────────────────────────────
         self.nav_state = VehicleStatus.NAVIGATION_STATE_MAX
-        self.arming_state = VehicleStatus.ARMING_STATE_DISARMED
+        self.arming_state = VehicleStatus.ARMING_STATE_DISARMED   #ARMING_STATE_STANDBY
+
+        # self.get_logger().info(f"VehicleStatus.ARMING_STATE_DISARMED: {VehicleStatus.ARMING_STATE_DISARMED}")
 
         # Current local NED position from PX4
         self.local_pos_ned = [0.0, 0.0, 0.0]   # x(N), y(E), z(D)
@@ -121,10 +133,22 @@ class ScuridDrone(Node):
         self.setpoint_yaw = float('nan')
         self.setpoint_initialised = False
 
+        # OFFBOARD / ARM handshake state
+        self.offboard_setpoint_counter = 0
+        self.arm_requested = False
+        self.last_mode_request_s = 0.0
+        self.last_arm_request_s = 0.0
+
         # ── Timer: publish offboard heartbeat + setpoint @ 20 Hz
         self.offboard_timer = self.create_timer(0.05, self.offboard_loop)
 
         self.get_logger().info('ScuridDrone node started — waiting for position fix …')
+        self.land_requested = False
+        self.land_command_sent = False
+
+        self.home_xy_ned = None
+        self.home_yaw = None
+        self.home_captured = False
 
     # ─────────────────────────────────────────────────────────────
     # PX4 Callbacks
@@ -135,30 +159,98 @@ class ScuridDrone(Node):
         self.arming_state = msg.arming_state
 
     def arming_callback(self, msg: String):
-        """Handle arm/disarm commands from /scurid_drone/arming topic."""
+        """Handle arm/disarm/land commands from /scurid_drone/arming topic."""
         cmd = msg.data.strip().lower()
+
         if cmd == 'arm':
-            self.get_logger().info('Arm requested via topic')
-            self.send_vehicle_command(command=400, param1=1.0)   # ARM
+            self.arm_requested = True
+            self.land_requested = False
+            self.land_command_sent = False
+
+            # Reset target to current vehicle pose before arming
+            if self.setpoint_initialised:
+                self.setpoint_ned = list(self.local_pos_ned)
+                self.setpoint_yaw = self.current_yaw
+
+                # Capture takeoff / landing reference once
+                self.home_xy_ned = [self.local_pos_ned[0], self.local_pos_ned[1]]
+                self.home_yaw = self.current_yaw
+                self.home_captured = True
+
+            self.get_logger().info(
+                f'ARM topic received | arm_requested={self.arm_requested} '
+                f'setpoint=[{self.setpoint_ned[0]:.2f}, {self.setpoint_ned[1]:.2f}, {self.setpoint_ned[2]:.2f}] '
+                f'home_xy={self.home_xy_ned} '
+                f'nav_state={self.nav_state} '
+                f'arming_state={self.arming_state}'
+            )
+
+        elif cmd == 'land':
+            self.get_logger().info(
+                f'Land requested via topic | nav_state={self.nav_state} '
+                f'arming_state={self.arming_state}'
+            )
+            self.arm_requested = False
+            self.land_requested = True
+            self.land_command_sent = False
+
         elif cmd == 'disarm':
-            self.get_logger().info('Disarm requested via topic')
+            self.get_logger().warn('Disarm requested via topic')
+            self.arm_requested = False
+            self.land_requested = False
+            self.land_command_sent = False
             self.send_vehicle_command(command=400, param1=0.0)   # DISARM
+        elif cmd == 'home':
+            if not self.home_captured or self.home_xy_ned is None:
+                self.get_logger().warn('HOME requested but no home position has been captured yet')
+                return
+
+            is_offboard = self.nav_state == VehicleStatus.NAVIGATION_STATE_OFFBOARD
+            is_armed = self.arming_state == VehicleStatus.ARMING_STATE_ARMED
+
+            if not (is_offboard and is_armed):
+                self.get_logger().warn('HOME requested but vehicle is not armed and in OFFBOARD')
+                return
+
+            # Return to remembered XY, keep current altitude
+            self.setpoint_ned[0] = self.home_xy_ned[0]
+            self.setpoint_ned[1] = self.home_xy_ned[1]
+
+            self.get_logger().info(
+                f'Returning to home XY: x={self.home_xy_ned[0]:.2f}, '
+                f'y={self.home_xy_ned[1]:.2f}, keeping z={self.setpoint_ned[2]:.2f}'
+            )
         else:
-            self.get_logger().warn(f'Unknown arming command: "{msg.data}"')
+            self.get_logger().warn(f'Unknown command: "{msg.data}"')
+
+    def land(self):
+        """Request PX4 Land mode."""
+        self.get_logger().info('Requesting LAND ...')
+        self.send_vehicle_command(
+            command=21,   # VEHICLE_CMD_NAV_LAND / MAV_CMD_NAV_LAND
+        )
 
     def local_position_callback(self, msg: VehicleLocalPosition):
-        if msg.xy_valid and msg.z_valid:
-            self.local_pos_ned = [msg.x, msg.y, msg.z]
-            self.current_yaw = msg.heading
-            self.local_pos_valid = True
+        self.get_logger().info(
+            f'Local pos received: x={msg.x:.2f}, y={msg.y:.2f}, z={msg.z:.2f}, '
+            f'heading={msg.heading:.2f}, xy_valid={msg.xy_valid}, z_valid={msg.z_valid}',
+            throttle_duration_sec=2.0
+        )
+        # Always cache the latest estimate coming from PX4
+        self.local_pos_ned = [msg.x, msg.y, msg.z]
+        self.current_yaw = msg.heading
+        self.local_pos_valid = bool(msg.xy_valid and msg.z_valid)
 
-            # Initialise setpoint to current position on first valid fix
-            if not self.setpoint_initialised:
-                self.setpoint_ned = [msg.x, msg.y, msg.z]
-                self.setpoint_yaw = msg.heading
-                self.setpoint_initialised = True
-                self.get_logger().info(
-                    f'Setpoint initialised to [{msg.x:.2f}, {msg.y:.2f}, {msg.z:.2f}] yaw={msg.heading:.2f}')
+        # Initialise setpoint from the first local position message we receive,
+        # even if PX4 does not mark xy/z as valid in this setup.
+        if not self.setpoint_initialised:
+            self.setpoint_ned = [msg.x, msg.y, msg.z]
+            self.setpoint_yaw = msg.heading
+            self.setpoint_initialised = True
+            self.get_logger().info(
+                f'Setpoint initialised to [{msg.x:.2f}, {msg.y:.2f}, {msg.z:.2f}] '
+                f'yaw={msg.heading:.2f} | xy_valid={msg.xy_valid} z_valid={msg.z_valid}'
+            )
 
     def global_pos_callback(self, msg):
         pass  # placeholder — extend for GPS‑based logic / UTM conversion
@@ -171,43 +263,33 @@ class ScuridDrone(Node):
     # ─────────────────────────────────────────────────────────────
 
     def pose_cmd_callback(self, msg: PoseStamped):
-        """
-        Interpret inbound PoseStamped as a *relative* body-frame offset:
-          position.x  → body forward  (metres)
-          position.y  → body right    (metres)
-          position.z  → body down     (metres — negative = climb)
-
-        The body-frame deltas are rotated into NED using the current
-        heading before being added to the absolute setpoint.
-
-        Yaw is taken from the quaternion z‑component as a simple
-        Δyaw (rad) for convenience (single‑axis rotation around D).
-        """
-        self.get_logger().info('CONTROLLING DRONE!')
         if not self.setpoint_initialised:
             return
 
+        is_offboard = self.nav_state == VehicleStatus.NAVIGATION_STATE_OFFBOARD
+        is_armed = self.arming_state == VehicleStatus.ARMING_STATE_ARMED
 
-        dx_body = msg.pose.position.x   # body forward
-        dy_body = msg.pose.position.y   # body right
-        dz_body = msg.pose.position.z   # body down (negative = up)
+        if not (is_armed and is_offboard):
+            return
 
-        # Rotate body-frame XY into NED using current yaw
+        dx_body = msg.pose.position.x
+        dy_body = msg.pose.position.y
+        dz_body = msg.pose.position.z
+
         cos_yaw = math.cos(self.current_yaw)
         sin_yaw = math.sin(self.current_yaw)
-        dn = dx_body * cos_yaw - dy_body * sin_yaw   # North
-        de = dx_body * sin_yaw + dy_body * cos_yaw   # East
+        dn = dx_body * cos_yaw - dy_body * sin_yaw
+        de = dx_body * sin_yaw + dy_body * cos_yaw
 
         self.setpoint_ned[0] += dn
         self.setpoint_ned[1] += de
         self.setpoint_ned[2] += dz_body
 
-        # Simple yaw delta from quaternion z component (small‑angle approx.)
         dyaw = msg.pose.orientation.z
         self.setpoint_yaw += dyaw
-        # Wrap to [-π, π]
         self.setpoint_yaw = math.atan2(
-            math.sin(self.setpoint_yaw), math.cos(self.setpoint_yaw))
+            math.sin(self.setpoint_yaw), math.cos(self.setpoint_yaw)
+        )
 
 
     # ─────────────────────────────────────────────────────────────
@@ -216,25 +298,51 @@ class ScuridDrone(Node):
 
     def offboard_loop(self):
         """Publish OffboardControlMode + TrajectorySetpoint and handle
-        arming / mode transitions."""
+        OFFBOARD / arming transitions in the correct PX4 order."""
 
-        # Always publish the offboard control mode so PX4 sees the heartbeat
+        now_us = int(self.get_clock().now().nanoseconds / 1000)
+        now_s = now_us / 1e6
+
+        # If LAND was requested, stop offboard publishing and hand control to PX4
+        if self.land_requested:
+            is_armed = self.arming_state == VehicleStatus.ARMING_STATE_ARMED
+
+            if not is_armed:
+                self.get_logger().warn('LAND requested but vehicle is not armed')
+                self.land_requested = False
+                self.land_command_sent = False
+                return
+
+            if not self.land_command_sent:
+                self.get_logger().info(
+                    f'Sending LAND command | nav_state={self.nav_state} '
+                    f'arming_state={self.arming_state}'
+                )
+                self.land()
+                self.land_command_sent = True
+                self.last_mode_request_s = now_s
+
+            # IMPORTANT:
+            # Do NOT publish OffboardControlMode or TrajectorySetpoint anymore.
+            # Do NOT try to switch back to OFFBOARD.
+            return
+
+        # Always publish the offboard heartbeat so PX4 sees the stream
         offboard_msg = OffboardControlMode()
-        offboard_msg.timestamp = int(self.get_clock().now().nanoseconds / 1000)
+        offboard_msg.timestamp = now_us
         offboard_msg.position = True
         offboard_msg.velocity = False
         offboard_msg.acceleration = False
         offboard_msg.attitude = False
         offboard_msg.body_rate = False
-        offboard_msg.thrust_and_torque = False
-        offboard_msg.direct_actuator = False
+        # offboard_msg.thrust_and_torque = False
+        # offboard_msg.direct_actuator = False
         self.publisher_offboard_mode.publish(offboard_msg)
 
-        # Publish trajectory setpoint (even before arming — PX4 needs it to
-        # accept offboard mode)
+        # Publish trajectory setpoint continuously once initialised
         if self.setpoint_initialised:
             sp = TrajectorySetpoint()
-            sp.timestamp = int(self.get_clock().now().nanoseconds / 1000)
+            sp.timestamp = now_us
             sp.position = [
                 float(self.setpoint_ned[0]),
                 float(self.setpoint_ned[1]),
@@ -247,14 +355,58 @@ class ScuridDrone(Node):
             sp.yawspeed = float('nan')
             self.publisher_trajectory.publish(sp)
 
-        # ── Request OFFBOARD mode (arming is handled via /scurid_drone/arming) ──
-        if self.nav_state != VehicleStatus.NAVIGATION_STATE_OFFBOARD:
-            self.get_logger().info('Requesting OFFBOARD mode …', throttle_duration_sec=2.0)
-            self.send_vehicle_command(
-                command=176,     # MAV_CMD_DO_SET_MODE
-                param1=1.0,      # Custom mode flag
-                param2=6.0,      # PX4 OFFBOARD mode
+            if self.offboard_setpoint_counter < 50:
+                self.offboard_setpoint_counter += 1
+                if self.offboard_setpoint_counter == 50:
+                    self.get_logger().info('OFFBOARD warmup complete (50 setpoints sent)')
+
+        if not self.setpoint_initialised:
+            self.get_logger().info(
+                'Waiting for valid local position / setpoint initialisation...',
+                throttle_duration_sec=2.0
             )
+            return
+
+        is_offboard = self.nav_state == VehicleStatus.NAVIGATION_STATE_OFFBOARD
+        is_armed = self.arming_state == VehicleStatus.ARMING_STATE_ARMED
+        warmup_done = self.offboard_setpoint_counter >= 50
+
+        # Step 1: after warmup, request OFFBOARD mode
+        if warmup_done and not is_offboard and (now_s - self.last_mode_request_s) >= 0.5:
+            self.get_logger().info(
+                f'Requesting OFFBOARD mode ... nav_state={self.nav_state} '
+                f'arming_state={self.arming_state}'
+            )
+            self.send_vehicle_command(
+                command=176,   # VEHICLE_CMD_DO_SET_MODE
+                param1=1.0,    # custom mode flag
+                param2=6.0,    # PX4 OFFBOARD
+            )
+            self.last_mode_request_s = now_s
+            return
+
+        if self.arm_requested and (now_s - self.last_arm_request_s) >= 0.5 and not is_armed:
+            self.get_logger().info(
+                f'ARM pending | warmup_done={warmup_done} '
+                f'is_offboard={is_offboard} '
+                f'nav_state={self.nav_state} '
+                f'arming_state={self.arming_state}'
+            )
+
+        # Step 2: only arm after OFFBOARD is active and an arm was requested
+        if (
+            self.arm_requested
+            and warmup_done
+            and is_offboard
+            and not is_armed
+            and (now_s - self.last_arm_request_s) >= 0.5
+        ):
+            self.get_logger().info('Requesting ARM ...')
+            self.send_vehicle_command(
+                command=400,   # VEHICLE_CMD_COMPONENT_ARM_DISARM
+                param1=1.0,
+            )
+            self.last_arm_request_s = now_s
 
     # ─────────────────────────────────────────────────────────────
     # Helpers

@@ -43,7 +43,7 @@ tmux set-option -t "$SESSION" -g pane-border-format "#{pane_title}"
 tmux send-keys -t "$SESSION":0.0 "cd \"$SCRIPT_DIR/ros2_ws\" && source install/setup.bash && ros2 run scurid_drone main.py" C-m
 tmux select-pane -t "$SESSION":0.0 -T "MAIN - main communicating with flight controller"
 
-# --- VERIFICATION NODE ---
+# --- FLIGHT TELEMETRY NODE ---
 VERIFY_PANE=$(tmux split-window -h -P -F "#{pane_id}" -t "$SESSION":0.0)
 tmux send-keys -t "$VERIFY_PANE" "cd \"$SCRIPT_DIR/ros2_ws\" && source install/setup.bash && ros2 run scurid_drone output.py" C-m
 tmux select-pane -t "$VERIFY_PANE" -T "OUTPUT - telemetry from flight controller"
@@ -53,7 +53,7 @@ VERIFY_PANE=$(tmux split-window -h -P -F "#{pane_id}" -t "$SESSION":0.0)
 tmux send-keys -t "$VERIFY_PANE" "cd \"$SCRIPT_DIR/ros2_ws\" && source install/setup.bash && ros2 run scurid_drone verification_node.py" C-m
 tmux select-pane -t "$VERIFY_PANE" -T "VERIFY - verification_node verifying drone commands"
 
-# --- TELEMETRY NODE ---
+#--- FLIGHT TELEMETRY SIGNING NODE ---
 TELEM_PANE=$(tmux split-window -v -P -F "#{pane_id}" -t "$SESSION":0.0)
 tmux send-keys -t "$TELEM_PANE" "cd \"$SCRIPT_DIR/ros2_ws\" && source install/setup.bash && ros2 run scurid_drone drone_telemetry_node.py" C-m
 tmux select-pane -t "$TELEM_PANE" -T "TELEMETRY - drone_telemetry_node signing telemetry data"

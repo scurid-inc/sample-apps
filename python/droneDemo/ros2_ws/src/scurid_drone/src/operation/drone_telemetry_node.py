@@ -21,9 +21,21 @@ class DroneTelemetryNode(DIDNode):
         # Initialize the base DIDNode, which also initializes the ROS node
         super().__init__('drone_telem_node')
 
+        self.prev_cpu_total = None
+        self.prev_cpu_idle = None
+
+        # Rough board power model for LattePanda companion
+        self.idle_power_w = 6.0
+        self.max_power_w = 12.0
+
         # Connect to agent
         self.channel = grpc.insecure_channel('localhost:4040') # Agent address:port
         self.stub = epg.ScuridEdgeAgentAPIStub(self.channel)
+
+        # Timing: publish/sign at fixed max frequency
+        self.publish_frequency = 1.0  # Hz
+        self.publish_period = 1.0 / self.publish_frequency
+        self.last_publish_time = 0.0
 
         # Subscriber
         self.subscriber = self.create_subscription(
@@ -53,6 +65,54 @@ class DroneTelemetryNode(DIDNode):
         except grpc.RpcError as e:
             self.get_logger().error(f'signwithidentity failed: {e.details()}')
             return None        
+
+    def read_cpu_times(self):
+        """
+        Read aggregate CPU times from /proc/stat.
+        Returns (total, idle)
+        """
+        with open("/proc/stat", "r") as f:
+            first = f.readline().strip()
+
+        parts = first.split()
+        if parts[0] != "cpu":
+            raise RuntimeError("Could not read /proc/stat cpu line")
+
+        values = [int(x) for x in parts[1:]]
+        idle = values[3] + values[4]   # idle + iowait
+        total = sum(values)
+        return total, idle
+
+    def estimate_companion_power_w(self):
+        """
+        Rough linear estimate based on CPU utilization.
+        """
+        try:
+            total, idle = self.read_cpu_times()
+
+            if self.prev_cpu_total is None:
+                self.prev_cpu_total = total
+                self.prev_cpu_idle = idle
+                return None
+
+            d_total = total - self.prev_cpu_total
+            d_idle = idle - self.prev_cpu_idle
+
+            self.prev_cpu_total = total
+            self.prev_cpu_idle = idle
+
+            if d_total <= 0:
+                return None
+
+            cpu_usage = 1.0 - (d_idle / d_total)
+            cpu_usage = max(0.0, min(1.0, cpu_usage))
+
+            power_w = self.idle_power_w + cpu_usage * (self.max_power_w - self.idle_power_w)
+            return round(power_w, 2)
+
+        except Exception as e:
+            self.get_logger().warn(f"Failed estimating companion power: {e}")
+            return None
 
     def pose_to_dict(self, msg: PoseStamped) -> dict:
         """
@@ -98,10 +158,15 @@ class DroneTelemetryNode(DIDNode):
         # Sign the bytes/data
         signed_cmd = self.signwithidentity(payload_bytes)
 
+        if signed_cmd is None:
+            self.get_logger().info("SIGNED_CMD IS NONE")
+            return None
+
         # Create data packet
         packet = {
             "payload": payload,
-            "signature": signed_cmd.signature
+            "signature": signed_cmd.signature,
+            "DID": self.did
         }
 
         # Convert entire packet into bytes
@@ -114,11 +179,28 @@ class DroneTelemetryNode(DIDNode):
         Runs when a telemetry message is received.
         It signs the message and republishes it. 
         """
+        current_time = self.get_clock().now().nanoseconds / 1e9
+
+        if current_time - self.last_publish_time < self.publish_period:
+            return
+
+        self.last_publish_time = current_time
+
         # Convert to dict
         telem_data = self.pose_to_dict(msg)
 
+        power_w = self.estimate_companion_power_w()
+        telem_data["companion_computer"] = {
+            "device": "LattePanda Delta 3",
+            "estimated_power_w": power_w
+        }
+
         # Sign
         signed_telem_data = self.sign(telem_data)
+
+        if signed_telem_data is None:
+            self.get_logger().info("None")
+            return
 
         # Create and publish the signed telemetry data as a ByteMultiArray
         out_msg = ByteMultiArray()

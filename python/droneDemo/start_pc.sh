@@ -47,18 +47,19 @@ tmux set-option -t "$SESSION" -g pane-border-status top
 tmux set-option -t "$SESSION" -g pane-border-format "#{pane_title}"
 
 # --- LAUNCH NODE ---
-tmux send-keys -t "$SESSION":0.0 "cd \"$SCRIPT_DIR/ros2_ws\" && source install/setup.bash && ros2 launch scurid_pc launch_pc.py" C-m
-tmux select-pane -t "$SESSION":0.0 -T "LAUNCH - pc_telemetry_node"
+LAUNCH_PANE="$SESSION":0.0
+tmux select-pane -t "$LAUNCH_PANE" -T "Secure drone telemetry stream"
+tmux send-keys -t "$LAUNCH_PANE" "cd \"$SCRIPT_DIR/ros2_ws\" && source install/setup.bash && ros2 launch scurid_pc launch_pc.py" C-m
 
 # --- CONTROL NODE ---
 CONTROL_PANE=$(tmux split-window -h -P -F "#{pane_id}" -t "$SESSION":0.0)
 tmux send-keys -t "$CONTROL_PANE" "cd \"$SCRIPT_DIR/ros2_ws\" && source install/setup.bash && ros2 run scurid_pc control_node.py" C-m
-tmux select-pane -t "$CONTROL_PANE" -T "CONTROL - control_node"
+tmux select-pane -t "$CONTROL_PANE" -T "Drone control panel"
 
 # --- ATTACK NODE ---
 ATTACK_PANE=$(tmux split-window -v -P -F "#{pane_id}" -t "$CONTROL_PANE")
 tmux send-keys -t "$ATTACK_PANE" "cd \"$SCRIPT_DIR/ros2_ws\" && source install/setup.bash && ros2 run scurid_pc attack_node.py" C-m
-tmux select-pane -t "$ATTACK_PANE" -T "ATTACK - attack_node"
+tmux select-pane -t "$ATTACK_PANE" -T "Attack panel"
 
 # --- AGENT ---
 AGENT_PANE=$(tmux split-window -v -P -F "#{pane_id}" -t "$SESSION":0.0)
