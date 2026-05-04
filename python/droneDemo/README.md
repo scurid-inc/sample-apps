@@ -26,6 +26,8 @@ The following must be installed on both the PC and the Companion Computer (CC):
 
 - Docker
 - Docker Compose
+
+The followed must be installed on the CC if real hardware (flight controller) is to be used:
 - Micro XRCE-DDS Agent (required for real hardware setup - Will be explained below)
 
 ---
@@ -85,11 +87,11 @@ agent/
 
 ### 5. Ensure time synchronization
 
-Both devices must use the same timezone. Check with:
+If Autonomous Edge and the corresponding dashboard are to be used, both devices must use the same timezone. Check with:
 ```bash
 date
 ```
-If they're not in the same timezone, change it (use your timezone):
+If they're not in the same timezone, change it (use respective timezone):
 ```bash
 ln -sf /usr/share/zoneinfo/Europe/Copenhagen /etc/localtime
 echo "Europe/Copenhagen" > /etc/timezone
@@ -102,7 +104,7 @@ echo "Europe/Copenhagen" > /etc/timezone
 Install Micro XRCE-DDS Agent on the host (outside Docker). Follow the guide here:
 https://docs.px4.io/main/en/middleware/uxrce_dds  
 
-Use "Install Standalone from Source"
+Use "Install Standalone from Source" (The Snap version might also work, I have only build from source)
 
 ---
 
