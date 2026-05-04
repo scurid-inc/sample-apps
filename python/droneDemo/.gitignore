@@ -7,13 +7,5 @@ ros2_ws/log/
 __pycache__/
 *.pyc
 
-# Agent runtime
-agent/log/
-agent/store/
-agent/pkg/
-
-# Agent binary
-agent/v*
-
 # Demo runtime
 scurid_rejected_commands.jsonl
