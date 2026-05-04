@@ -23,21 +23,20 @@ import math
 # ROS Imports                                 #
 ###############################################
 import rclpy
-from rclpy.node import Node
 from rclpy.qos import (
     QoSProfile,
     QoSReliabilityPolicy,
     QoSHistoryPolicy,
     QoSDurabilityPolicy,
 )
+from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
 
 ###############################################
 # ROS Topic messages                          #
 ###############################################
-from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import String
-
+from geometry_msgs.msg import PoseStamped
 from px4_msgs.msg import (
     VehicleCommand,
     OffboardControlMode,
@@ -46,7 +45,6 @@ from px4_msgs.msg import (
     VehicleLocalPosition,
     VehicleAttitude,
 )
-
 
 ###############################################
 # Main Control class                          #

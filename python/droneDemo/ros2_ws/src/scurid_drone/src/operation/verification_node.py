@@ -91,8 +91,8 @@ class VerificationNode(DIDNode):
         try:
             with open(self.rejected_command_log, "a", encoding="utf-8") as f:
                 f.write(json.dumps(event, separators=(",", ":")) + "\n")
-        except Exception:
-            pass
+        except Exception as e:
+            sys.stderr.write(f"[verification_node] failed to write rejected command event: {e}\n")
 
     def _render_ui(self):
         cols, rows = shutil.get_terminal_size(fallback=(80, 24))

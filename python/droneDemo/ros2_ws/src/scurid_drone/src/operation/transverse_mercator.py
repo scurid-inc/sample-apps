@@ -138,9 +138,7 @@ class tranmerc():
 		c7 = c**7
 		t = tan (lat)
 		tan2 = t**2
-		tan3 = t**3
 		tan4 = t**4
-		tan5 = t**5
 		tan6 = t**6
 		eta = self.ebs * c2
 		eta2 = eta**2
@@ -179,7 +177,6 @@ class tranmerc():
 		sr = self.sphsr(ftphi) # radius of Curvature in the meridian
 		sn = self.sphsn(ftphi) # radius of Curvature in the meridian
 
-		s = sin(ftphi) # sine cosine terms
 		c = cos(ftphi)
 		t = tan(ftphi) # tangent value
 		tan2 = t**2

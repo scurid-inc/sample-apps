@@ -29,7 +29,6 @@ Date: 13.03.2026
 ###############################################
 # Standard Imports                            #
 ###############################################
-import math
 
 ###############################################
 # ROS Imports                                 #
@@ -102,8 +101,8 @@ class JoystickRelay(Node):
                 disarm_msg = String()
                 disarm_msg.data = 'disarm'
                 self.arming_pub.publish(disarm_msg)
-        except IndexError:
-            pass
+        except IndexError as e:
+            self.get_logger().warn('Error: ', e)
 
         try:
             # Stick inputs (with deadzone)

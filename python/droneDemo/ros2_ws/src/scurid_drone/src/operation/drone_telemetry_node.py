@@ -148,7 +148,7 @@ class DroneTelemetryNode(DIDNode):
         # Check for DID
         if self.did is None:
             self.get_logger().warn("DID not available yet; command not signed")
-            return
+            return None
 
         # Copy the payload
         payload = dict(telem_data)

@@ -128,7 +128,7 @@ class utmconv():
 			elif latitude >= 48.0: zlet = 'U'
 			elif latitude >= 40.0: zlet = 'T'
 			elif latitude >= 32.0: zlet = 'S'
-			elif latitude >= 24.0: let = 'R'
+			elif latitude >= 24.0: zlet = 'R'
 			elif latitude >= 16.0: zlet = 'Q'
 			elif latitude >= 8.0: zlet = 'P'
 			else: zlet = 'N'
