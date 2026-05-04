@@ -300,9 +300,6 @@ class ControlNode(DIDNode):
             elif choice == "10":
                 self.send_arming_command("arm")
                 continue
-            # elif choice == "11":
-            #     self.send_arming_command("disarm")
-            #     continue
             elif choice == "11":
                 self.send_arming_command("land")
                 continue

@@ -44,7 +44,6 @@ from px4_msgs.msg import (
     TrajectorySetpoint,
     VehicleStatus,
     VehicleLocalPosition,
-    VehicleGlobalPosition,
     VehicleAttitude,
 )
 
@@ -99,10 +98,6 @@ class ScuridDrone(Node):
             VehicleLocalPosition, '/fmu/out/vehicle_local_position',
             self.local_position_callback, qos_profile_sub)
 
-        # self.global_pos_sub = self.create_subscription(
-        #     VehicleGlobalPosition, '/fmu/out/vehicle_global_position',
-        #     self.global_pos_callback, qos_profile_sub)
-
         self.attitude_sub = self.create_subscription(
             VehicleAttitude, '/fmu/out/vehicle_attitude',
             self.attitude_callback, qos_profile_sub)
@@ -120,8 +115,6 @@ class ScuridDrone(Node):
         # ── State variables ─────────────────────────────────────
         self.nav_state = VehicleStatus.NAVIGATION_STATE_MAX
         self.arming_state = VehicleStatus.ARMING_STATE_DISARMED   #ARMING_STATE_STANDBY
-
-        # self.get_logger().info(f"VehicleStatus.ARMING_STATE_DISARMED: {VehicleStatus.ARMING_STATE_DISARMED}")
 
         # Current local NED position from PX4
         self.local_pos_ned = [0.0, 0.0, 0.0]   # x(N), y(E), z(D)
@@ -290,7 +283,6 @@ class ScuridDrone(Node):
         self.setpoint_yaw = math.atan2(
             math.sin(self.setpoint_yaw), math.cos(self.setpoint_yaw)
         )
-
 
     # ─────────────────────────────────────────────────────────────
     # Offboard control loop (20 Hz timer)

@@ -3,7 +3,6 @@
 import sys
 import json
 import shutil
-from pprint import pformat
 from datetime import datetime
 
 import grpc
@@ -94,11 +93,14 @@ class PCTelemetryNode(DIDNode):
             ori_y = self._safe_float(ori["y"], 3)
             ori_z = self._safe_float(ori["z"], 3)
             ori_w = self._safe_float(ori["w"], 3)
-            power_draw = self.telemetry["companion_computer"]["estimated_power_w"]
+            comp = self.telemetry.get("companion_computer", {})
+            power_draw = comp.get("estimated_power_w")
+
+            if power_draw is None:
+                power_draw = "-"
 
         lines = [
             self._fit("SCURID TELEMETRY RECEIVER", width),
-            # self._sep(min(width, 60)),
             self._fit(f"Timestamp      {now}", width),
             self._fit(f"Status         {self.latest_status}", width),
             self._fit(f"Last telemetry {self.last_update_time}", width),
@@ -175,15 +177,6 @@ class PCTelemetryNode(DIDNode):
         """
         formatted_data = self.format_data(data)
         str_data = json.dumps(formatted_data)
-        
-        # # Pretty dict (Python representation)
-        # pretty_dict = pformat(formatted_data, indent=2, width=100)
-
-        # # Pretty JSON string
-        # pretty_json = json.dumps(formatted_data, indent=2, sort_keys=True)
-
-        # self.get_logger().info(f"\nDICT:\n{pretty_dict}")
-        # self.get_logger().info(f"\nJSON:\n{pretty_json}")
 
         # Send data
         try:

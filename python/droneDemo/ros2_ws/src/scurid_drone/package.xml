@@ -4,7 +4,7 @@
   <name>scurid_drone</name>
   <version>0.0.0</version>
   <description>This package includes instructions to control a PX4-based drone.</description>
-  <maintainer email="erw@teknologisk.dk">erw</maintainer>
+  <maintainer email="ditlev.andersen@scurid.com">Ditlev Andersen</maintainer>
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
+import sys
 import json
 import shutil
-import sys
 import textwrap
 from pathlib import Path
 from datetime import datetime
@@ -88,12 +88,9 @@ class VerificationNode(DIDNode):
             "did": str(did),
         }
 
-        # self.get_logger().info(f"Writing rejected command event to {self.rejected_command_log}")
-
         try:
             with open(self.rejected_command_log, "a", encoding="utf-8") as f:
                 f.write(json.dumps(event, separators=(",", ":")) + "\n")
-            # self.get_logger().info("Rejected command event written")
         except Exception:
             pass
 
@@ -164,7 +161,10 @@ class VerificationNode(DIDNode):
         self._render_ui()
 
     def verify(self, protected_data):
-        data = json.loads(protected_data.decode("utf-8"))
+        try:
+            data = json.loads(protected_data.decode("utf-8"))
+        except Exception:
+            return None, False, None, None, "Invalid JSON"
 
         signature = data["signature"]
         payload = data["payload"]
@@ -174,7 +174,7 @@ class VerificationNode(DIDNode):
             use_scurid = data["use_scurid"]
             if not use_scurid:
                 return payload, True, signature, signer_did, "VALID SIGNATURE"
-        except:
+        except:  # noqa: E722
             pass
 
         payload_bytes = json.dumps(

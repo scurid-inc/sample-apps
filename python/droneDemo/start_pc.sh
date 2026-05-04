@@ -49,7 +49,7 @@ tmux set-option -t "$SESSION" -g pane-border-format "#{pane_title}"
 # --- LAUNCH NODE ---
 LAUNCH_PANE="$SESSION":0.0
 tmux select-pane -t "$LAUNCH_PANE" -T "Secure drone telemetry stream"
-tmux send-keys -t "$LAUNCH_PANE" "cd \"$SCRIPT_DIR/ros2_ws\" && source install/setup.bash && ros2 launch scurid_pc launch_pc.py" C-m
+tmux send-keys -t "$LAUNCH_PANE" "cd \"$SCRIPT_DIR/ros2_ws\" && source install/setup.bash && ros2 run scurid_pc pc_telemetry_node.py" C-m
 
 # --- CONTROL NODE ---
 CONTROL_PANE=$(tmux split-window -h -P -F "#{pane_id}" -t "$SESSION":0.0)

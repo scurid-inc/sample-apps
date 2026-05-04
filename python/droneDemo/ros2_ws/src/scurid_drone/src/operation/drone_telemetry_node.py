@@ -145,6 +145,11 @@ class DroneTelemetryNode(DIDNode):
         """
         Signs the data using Scurid API
         """
+        # Check for DID
+        if self.did is None:
+            self.get_logger().warn("DID not available yet; command not signed")
+            return
+
         # Copy the payload
         payload = dict(telem_data)
 
@@ -159,7 +164,6 @@ class DroneTelemetryNode(DIDNode):
         signed_cmd = self.signwithidentity(payload_bytes)
 
         if signed_cmd is None:
-            self.get_logger().info("SIGNED_CMD IS NONE")
             return None
 
         # Create data packet
@@ -189,11 +193,14 @@ class DroneTelemetryNode(DIDNode):
         # Convert to dict
         telem_data = self.pose_to_dict(msg)
 
+        # Add companien computer info
         power_w = self.estimate_companion_power_w()
-        telem_data["companion_computer"] = {
-            "device": "LattePanda Delta 3",
-            "estimated_power_w": power_w
-        }
+        comp = {}
+        if power_w is not None:
+            comp["estimated_power_w"] = power_w
+
+        if comp:
+            telem_data["companion_computer"] = comp
 
         # Sign
         signed_telem_data = self.sign(telem_data)
