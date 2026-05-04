@@ -18,15 +18,15 @@ RUN apt update && apt install -y \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install --no-cache-dir --upgrade \
-    pip \
-    setuptools \
-    packaging \
-    wheel
+    pip==26.1 \
+    setuptools==82.0.1 \
+    packaging==26.2 \
+    wheel==0.47.0
 
 RUN pip3 install --no-cache-dir \
-    grpcio \
-    grpcio-tools \
-    protobuf
+    grpcio==1.80.0 \
+    grpcio-tools==1.80.0 \
+    protobuf==6.33.6
 
 RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc
 
