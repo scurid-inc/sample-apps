@@ -1,91 +1,242 @@
 # Scurid Drone Demo
 
-This project runs Scurid on a drone using ROS 2. It launches ROS 2 nodes for drone control and telemetry, where both control commands and telemetry data are secured and signed using the Scurid infrastructure.
+This project demonstrates how Scurid secures drone communication using ROS 2.
 
-A dedicated ROS 2 node can simulate an attacker by injecting spoofed or tampered control commands into the system.
+It runs on a drone setup where:
+- Control commands are signed before being sent to the drone  
+- Telemetry data is signed before being transmitted back  
+- A simulated attacker can inject malicious commands to test the system  
 
-## System Setup
+---
 
-The demo requires two devices:
-- A companion computer (CC) mounted on the drone
-- A separate PC (or similar device) for controlling the drone
+## Overview
 
-Both systems should run Ubuntu 22. 
+The system consists of two devices:
 
-**Note:** If you are not running Ubuntu 22 natively, you can use a Docker container with Ubuntu 22 and ROS 2 Humble:
+- **Drone Companion Computer (CC)** – mounted on the drone  
+- **Control PC** – used to send commands and receive telemetry  
 
-When starting the container:
-- Mount your workspace (this repository) into the container
-- Grant access to the required serial device (e.g. `/dev/ttyUSB0`)
+Both devices run ROS 2 nodes secured by Scurid.
 
-Example:
+---
+
+## Prerequisites
+
+The following must be installed on both the PC and the Companion Computer (CC):
+
+- Docker
+- Docker Compose
+- Micro XRCE-DDS Agent (required for real hardware setup - Will be explained below)
+
+---
+
+## Setup
+
+### 1. Clone the repository
+
+Run on **both PC and CC**:
+
 ```bash
-docker run -it --rm \
-  --name <your_ROS2_container_name> \
-  --network host \
-  --device=<host_serial_device>:<container_serial_device> \
-  -v <host_workspace_path>:/workspace \
-  -w /workspace \
-  <ros2_humble_image> \
-  bash
+git clone --branch drone_demo --recurse-submodules git@github.com:scurid-inc/sample-apps.git
+cd sample-apps/python/droneDemo
 ```
 
-## Requirements
+---
 
-- Scurid agent binary placed in the `agent/` folder on both devices
-- ROS 2 (Humble)
-- Colcon build tools
-- Both devices connected to the same network
-- gRPC
-- Protobuf
+### 2. Start the environment
 
-## Installation
-
-Clone the repository onto both the drone CC and a PC.
-
-Build the workspace (Do this both on the drone and on the PC):
 ```bash
-cd ros2_ws
+docker compose up -d --build
+docker exec -it scurid_drone_project bash
+```
+
+---
+
+### 3. Configure ROS workspace (Do this only if you need a specific px4_msg version)
+
+Inside the container:
+
+```bash
+cd workspace/ros2_ws/src/px4_msg
+git checkout <matching-px4-version>
+```
+
+The branch must match the PX4 firmware running on the flight controller.
+
+Then build the project inside ros2_ws/:
+
+```bash
+cd /workspace/ros2_ws
 colcon build
 source install/setup.bash
 ```
 
-On the CC, install **uXRCE-DDS** by following the official PX4 instructions:
+---
 
-- https://docs.px4.io/main/en/middleware/uxrce_dds
+### 4. Add Scurid agent
 
-Use the section **"Install Standalone from Source"**.
+Place your agent binary in:
 
-## Usage
-Make sure the CC is connected to the flight controller.
+```
+agent/
+```
 
-In a terminal on the CC: Start the Micro XRCE-DDS Agent over a serial connection:
+---
+
+### 5. Ensure time synchronization
+
+Both devices must use the same timezone. Check with:
+```bash
+date
+```
+If they're not in the same timezone, change it (use your timezone):
+```bash
+ln -sf /usr/share/zoneinfo/Europe/Copenhagen /etc/localtime
+echo "Europe/Copenhagen" > /etc/timezone
+```
+
+---
+
+## Companion Computer (CC) Setup
+
+Install Micro XRCE-DDS Agent on the host (outside Docker). Follow the guide here:
+https://docs.px4.io/main/en/middleware/uxrce_dds  
+
+Use "Install Standalone from Source"
+
+---
+
+## Running the Demo
+
+### 1. Start DDS Agent (on CC outside Docker)
+This will allow the CC to receive data from the flight controller.
 
 ```bash
 sudo MicroXRCEAgent serial --dev /dev/ttyUSB0 -b 921600
 ```
 
-**Note:** The serial device may differ (e.g. `/dev/ttyACM0`, `/dev/ttyUSB1`). Check available devices with `ls /dev/tty*` and use the correct one.
+You might need to use something else than 'USB0'. Check available devices if needed:
 
-This demo is split into two; PC and CC/drone. Both are startet on their respective devices with a shell script.
+```bash
+ls /dev/tty*
+```
 
-On PC:
+---
+
+### 2. Start the system
+
+#### On PC
+
 ```bash
 ./start_pc.sh
 ```
-This starts:
-- Drone control nodes exposing a simple UI for sending signed control commands
-- Telemetry subscriber receiving signed telemetry data from the drone
-- Attack simulation used to inject malicious commands to the control stream
+
+This launches:
+- Telemetry receiver (signed data)
+- Control interface (signed commands)
+- Attack simulation
 - Scurid agent
 
-On drone companion computer:
+---
+
+#### On Drone (CC)
+
 ```bash
 ./start_drone.sh
 ```
-This starts:
-- Communication with the Pixhawk4 flight controller
-- Drone telemetry publisher reading raw data from the flight controller and publishing it on a topic
-- Scurid-secured telemetry communication used to sign the raw flight controller telemetry data
-- Scurid-secured control commands receiver used to verify drone control commands
+
+This launches:
+- Flight controller communication
+- Telemetry publisher
+- Telemetry signing
+- Command verification
 - Scurid agent
+
+---
+## Development Tips
+
+### Rebuilding the workspace
+
+After making changes, rebuild the workspace:
+
+```bash
+cd workspace/ros2_ws
+colcon build
+```
+
+To build a specific package:
+
+```bash
+colcon build --packages-select scurid_drone
+```
+
+Always source after building:
+
+```bash
+source workspace/ros2_ws/install/setup.bash
+```
+
+---
+
+### Clean build
+
+For a clean rebuild, delete:
+
+```bash
+workspace/ros2_ws/build/
+workspace/ros2_ws/install/
+workspace/ros2_ws/log/
+```
+
+Then rebuild again with `colcon build`.
+
+---
+
+### Running individual nodes
+
+You can run nodes directly without the start scripts:
+
+```bash
+ros2 run scurid_drone drone_telemetry_node.py
+```
+
+---
+
+### Using tmux (start scripts)
+
+The `start_pc.sh` and `start_drone.sh` scripts use tmux.
+
+- Switch panes:
+  - `Ctrl + b`, then arrow keys  
+
+- Kill session:
+  - `Ctrl + b`, then `:`
+  - Type: `kill-session`
+
+---
+
+## Simulation (Optional)
+
+If one does not have a drone to use -> The project includes a drone simulation in **PX4_DockerSim/**.
+
+- Follow the instructions in its `README.md`
+- When using the simulation, you **do not need to run the MicroXRCEAgent** from step "1. Start DDS Agent (on CC outside Docker)"
+
+
+---
+
+## Notes
+
+- The CC must be connected to the flight controller (e.g., Pixhawk)
+- Serial device names may vary (/dev/ttyUSB0, /dev/ttyACM0, etc.)
+- Time mismatch between devices will break validation
+- Both sides must use compatible PX4 message versions
+- Both devices must be on the same network
+
+---
+
+## What This Demo Shows
+
+- Secure command execution (signed control messages)  
+- Secure telemetry streaming (signed telemetry data)  
+- Detection of malicious command injection  
