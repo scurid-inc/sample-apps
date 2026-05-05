@@ -37,13 +37,25 @@ class VerificationNode(DIDNode):
             10
         )
 
-        self.latest_timestamp = "Never"
-        self.latest_status = "Waiting for command"
-        self.latest_result = "-"
-        self.latest_payload = "-"
-        self.latest_signature = "-"
-        self.latest_did = "-"
-        self.latest_color = ""
+        self.normal_cmd = {
+            "timestamp": "Never",
+            "status": "Waiting for normal command",
+            "result": "-",
+            "payload": "-",
+            "signature": "-",
+            "did": "-",
+            "color": "",
+        }
+
+        self.attack_cmd = {
+            "timestamp": "Never",
+            "status": "Waiting for malicious command",
+            "result": "-",
+            "payload": "-",
+            "signature": "-",
+            "did": "-",
+            "color": "",
+        }
 
         self.ui_timer = self.create_timer(1.0, self._render_ui)
         
@@ -95,44 +107,30 @@ class VerificationNode(DIDNode):
             sys.stderr.write(f"[verification_node] failed to write rejected command event: {e}\n")
 
     def _render_ui(self):
-        cols, rows = shutil.get_terminal_size(fallback=(80, 24))
+        cols, rows = shutil.get_terminal_size(fallback=(100, 30))
         width = max(20, cols - 2)
-
-        reset = "\033[0m"
-        red = "\033[31m"
-        green = "\033[32m"
-
-        payload_lines = self._wrap(self.latest_payload, width)
-        signature_lines = self._wrap(self.latest_signature, width)
-        did_lines = self._wrap(self.latest_did, width)
-
-        status_value = self.latest_status
-        result_value = self.latest_result
-
-        if self.latest_color == "green":
-            status_value = f"{green}{status_value}{reset}"
-            result_value = f"{green}{result_value}{reset}"
-        elif self.latest_color == "red":
-            status_value = f"{red}{status_value}{reset}"
-            result_value = f"{red}{result_value}{reset}"
 
         lines = [
             "VERIFICATION NODE",
-            "-" * min(width, 60),
             f"Timestamp       {self._timestamp()}",
-            f"Last command    {self.latest_timestamp}",
-            f"Status          {status_value}",
-            f"Result          {result_value}",
             "",
-            "Payload",
-            *payload_lines,
-            "",
-            "Signature",
-            *signature_lines,
-            "",
-            "DID",
-            *did_lines,
         ]
+
+        lines.extend(
+            self._render_command_block(
+                "NORMAL / LEGITIMATE COMMAND",
+                self.normal_cmd,
+                width,
+            )
+        )
+
+        lines.extend(
+            self._render_command_block(
+                "MALICIOUS / ATTACK COMMAND",
+                self.attack_cmd,
+                width,
+            )
+        )
 
         visible = []
         for line in lines[:max(1, rows - 1)]:
@@ -143,20 +141,61 @@ class VerificationNode(DIDNode):
         sys.stdout.write("\033[2J\033[H" + frame + "\n")
         sys.stdout.flush()
 
-    def _set_ui(self, status, result, payload=None, signature=None, did=None, color=""):
-        self.latest_timestamp = self._timestamp()
-        self.latest_status = status
-        self.latest_result = result
-        self.latest_color = color
+    def _render_command_block(self, title, state, width):
+        reset = "\033[0m"
+        red = "\033[31m"
+        green = "\033[32m"
+        yellow = "\033[33m"
+
+        status = state["status"]
+        result = state["result"]
+
+        if state["color"] == "green":
+            status = f"{green}{status}{reset}"
+            result = f"{green}{result}{reset}"
+        elif state["color"] == "red":
+            status = f"{red}{status}{reset}"
+            result = f"{red}{result}{reset}"
+        elif state["color"] == "yellow":
+            status = f"{yellow}{status}{reset}"
+            result = f"{yellow}{result}{reset}"
+
+        lines = [
+            title,
+            "-" * min(width, 60),
+            f"Last command    {state['timestamp']}",
+            f"Status          {status}",
+            f"Result          {result}",
+            "",
+            "Payload",
+            *self._wrap(state["payload"], width),
+            "",
+            "Signature",
+            *self._wrap(state["signature"], width),
+            "",
+            "DID",
+            *self._wrap(state["did"], width),
+            "",
+        ]
+
+        return lines
+
+    def _set_ui(self, target, status, result, payload=None, signature=None, did=None, color=""):
+        state = self.attack_cmd if target == "attack" else self.normal_cmd
+
+        state["timestamp"] = self._timestamp()
+        state["status"] = status
+        state["result"] = result
+        state["color"] = color
 
         if payload is not None:
-            self.latest_payload = json.dumps(payload, separators=(", ", ": "))
+            state["payload"] = json.dumps(payload, separators=(", ", ": "))
 
         if signature is not None:
-            self.latest_signature = str(signature)
+            state["signature"] = str(signature)
 
         if did is not None:
-            self.latest_did = str(did)
+            state["did"] = str(did)
 
         self._render_ui()
 
@@ -220,16 +259,26 @@ class VerificationNode(DIDNode):
     def listener_callback(self, msg):
         protected_data = b"".join(msg.data)
 
+        try:
+            raw_packet = json.loads(protected_data.decode("utf-8"))
+        except Exception:
+            raw_packet = {}
+
+        is_attack = "use_scurid" in raw_packet
+
         verified_data, req, signature, signer_did, result = self.verify(protected_data)
+
+        target = "attack" if is_attack or not req else "normal"
 
         if not req:
             self._set_ui(
+                target,
                 "Command rejected",
                 result,
                 payload=verified_data,
                 signature=signature,
                 did=signer_did,
-                color="red"
+                color="red",
             )
 
             self._emit_rejected_command_event(
@@ -243,15 +292,22 @@ class VerificationNode(DIDNode):
 
         self.publish_pose_command(verified_data)
 
+        if target == "attack":
+            status = "Malicious command accepted"
+            color = "yellow"
+        else:
+            status = "Command accepted"
+            color = "green"
+
         self._set_ui(
-            "Command accepted",
+            target,
+            status,
             result,
             payload=verified_data,
             signature=signature,
             did=signer_did,
-            color="green"
+            color=color,
         )
-
 
 def main(args=None):
     rclpy.init(args=args)
