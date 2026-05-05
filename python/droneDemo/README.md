@@ -59,7 +59,7 @@ docker exec -it scurid_drone_project bash
 Inside the container:
 
 ```bash
-cd workspace/ros2_ws/src/px4_msg
+cd workspace/ros2_ws/src/px4_msgs
 git checkout <matching-px4-version>
 ```
 
@@ -99,7 +99,7 @@ echo "Europe/Copenhagen" > /etc/timezone
 
 ---
 
-## Companion Computer (CC) Setup
+## Companion Computer (CC) Setup (This is only required for use on a real drone - Skip this if you're using the simulation)
 
 Install Micro XRCE-DDS Agent on the host (outside Docker). Follow the guide here:
 https://docs.px4.io/main/en/middleware/uxrce_dds  
@@ -110,7 +110,7 @@ Use "Install Standalone from Source" (The Snap version might also work, I have o
 
 ## Running the Demo
 
-### 1. Start DDS Agent (on CC outside Docker)
+### 1. Start DDS Agent (on CC outside Docker) (Again, only do this if you're running on a real drone)
 This will allow the CC to receive data from the flight controller.
 
 ```bash
@@ -126,6 +126,14 @@ ls /dev/tty*
 ---
 
 ### 2. Start the system
+
+Navigate to workspace/:
+
+```
+cd /workspace/
+```
+
+Start the respective launch scripts:
 
 #### On PC
 
@@ -223,6 +231,11 @@ If one does not have a drone to use -> The project includes a drone simulation i
 
 - Follow the instructions in its `README.md`
 - When using the simulation, you **do not need to run the MicroXRCEAgent** from step "1. Start DDS Agent (on CC outside Docker)"
+
+QGroundControl must be installed and running.
+
+Download and installation instructions are available here:
+https://docs.qgroundcontrol.com/master/en/qgc-user-guide/getting_started/download_and_install.html
 
 
 ---
