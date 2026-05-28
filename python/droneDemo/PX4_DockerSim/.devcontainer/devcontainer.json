@@ -1,0 +1,66 @@
+// ============================================================================
+// PX4 SITL  +  Gazebo Harmonic  +  ROS 2 Jazzy  –  Dev Container
+//
+// "Reopen in Container" in VS Code to launch.
+// Inside the container run:
+//     cd /src/PX4-Autopilot && make px4_sitl gz_x500
+//
+// QGroundControl on the host connects automatically via UDP (host network mode).
+// Port 8888/udp is also forwarded for custom external tools.
+// ============================================================================
+{
+    "name": "PX4 Simulation (Jazzy + Gazebo Harmonic)",
+
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": "."
+    },
+
+    // Run as the px4 user created in the Dockerfile.
+    // updateRemoteUserUID (on by default) remaps the UID to match the host.
+    "remoteUser": "px4",
+    "updateRemoteUserUID": true,
+
+    // ── Runtime flags ──────────────────────────────────────────────────────
+    "runArgs": [
+        "--privileged",
+        "--network=host"
+    ],
+
+    // ── Mounts ─────────────────────────────────────────────────────────────
+    "mounts": [
+        "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,readonly"
+    ],
+
+    // ── Workspace mount ────────────────────────────────────────────────────
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+    "workspaceFolder": "/workspace",
+
+    // ── Environment ────────────────────────────────────────────────────────
+    "containerEnv": {
+        "DISPLAY": "${localEnv:DISPLAY}",
+        "PX4_HOME": "/src/PX4-Autopilot",
+        "ROS_DOMAIN_ID": "0",
+        "GZ_SIM_RESOURCE_PATH": "/src/PX4-Autopilot/Tools/simulation/gz/models:/src/PX4-Autopilot/Tools/simulation/gz/worlds"
+    },
+
+    // ── VS Code extensions ─────────────────────────────────────────────────
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-vscode.cmake-tools",
+                "ms-vscode.cpptools",
+                "ms-iot.vscode-ros",
+                "redhat.vscode-yaml"
+            ],
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash",
+                "cmake.sourceDirectory": "/src/PX4-Autopilot"
+            }
+        }
+    },
+
+    // ── Post-create ────────────────────────────────────────────────────────
+    "postCreateCommand": "sudo chown -R $(id -u):$(id -g) /src/PX4-Autopilot /ros2_ws && echo 'Container ready – run: cd /src/PX4-Autopilot && make px4_sitl gz_x500'"
+}

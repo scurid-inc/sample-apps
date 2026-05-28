@@ -1,0 +1,16 @@
+services:
+  ros2:
+    build: .
+    image: scurid-drone-ros2:humble
+    container_name: scurid_drone_project
+
+    network_mode: host
+    ipc: host
+    privileged: true
+
+    volumes:
+      - .:/workspace
+
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
